@@ -13,7 +13,7 @@ type bankKeeper interface {
 }
 
 type pricefeedKeeper interface {
-	GetCurrentPrice(sdk.Context, string) pricefeed.CurrentPrice
+	GetCurrentPrice(sdk.Context, Token) pricefeed.CurrentPrice
 	// These are used for testing TODO replace mockApp with keeper in tests to remove these
 	AddAsset(sdk.Context, string, string)
 	SetPrice(sdk.Context, sdk.AccAddress, string, sdk.Dec, sdk.Int) (pricefeed.PostedPrice, sdk.Error)

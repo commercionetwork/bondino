@@ -35,6 +35,11 @@ const (
 
 	// OraclePrefix store prefix for the oracle accounts
 	OraclePrefix = StoreKey + ":oracles"
+
+	// EstimableAssetPrefix store prefix for the estimable assets
+	EstimableAssetPrefix = StoreKey + ":estimableassets"
+
+
 )
 
 // Keeper struct for pricefeed module
@@ -78,6 +83,7 @@ func (k Keeper) AddAsset(
 	)
 }
 
+
 // SetPrice updates the posted price for a specific oracle
 func (k Keeper) SetPrice(
 	ctx sdk.Context,
@@ -117,6 +123,7 @@ func (k Keeper) SetPrice(
 
 }
 
+
 // SetCurrentPrices updates the price of an asset to the meadian of all valid oracle inputs
 func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 	assets := k.GetAssets(ctx)
@@ -140,7 +147,9 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 		// TODO make threshold for acceptance (ie. require 51% of oracles to have posted valid prices
 		if l == 0 {
 			// Error if there are no valid prices in the raw pricefeed
-			return ErrNoValidPrice(k.codespace)
+			// return ErrNoValidPrice(k.codespace)
+			medianPrice = 0.0
+			expiry = 0
 		} else if l == 1 {
 			// Return immediately if there's only one price
 			medianPrice = notExpiredPrices[0].Price
@@ -182,6 +191,17 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 
 	return nil
 }
+
+
+// GetOracles returns the oracles in the pricefeed store
+func (k Keeper) GetEstimableAssets(ctx sdk.Context) []EstimableAsset {
+	store := ctx.KVStore(k.storeKey)
+	bz := store.Get([]byte(Esti))
+	var estimableAssets []EstimableAsset
+	k.cdc.MustUnmarshalBinaryBare(bz, &estimableAssets)
+	return estimableAssets
+}
+
 
 // GetOracles returns the oracles in the pricefeed store
 func (k Keeper) GetOracles(ctx sdk.Context) []Oracle {
@@ -227,13 +247,42 @@ func (k Keeper) GetOracle(ctx sdk.Context, oracle string) (Oracle, bool) {
 
 }
 
-// GetCurrentPrice fetches the current median price of all oracles for a specific asset
-func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string) CurrentPrice {
+func (k Keeper) SetOracleMsg(ctx sdk.Context, storedPriceKey string) CurrentPrice {
+	type EstimableAsset struct {
+		OracleAddress string  `json:"oracle_address"`
+		AssetCode     string  `json:"asset_code"`
+		Estimed       bool  `json:"estimed"`
+	}
+
+	var oracles []Oracle
+	esitimableAssets := k.GetEstimableAssets(ctx)
+	esitimableAssets = append(esitimableAssets, EstimableAssets{OracleAddress: address, AssetCode: storedPriceKey, Estimed: false})
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get([]byte(CurrentPricePrefix + assetCode))
+	store.Set(
+		[]byte(EstimableAssetPrefix), k.cdc.MustMarshalBinaryBare(esitimableAssets),
+	)
+}
+
+
+// GetCurrentPrice fetches the current median price of all oracles for a specific asset
+func (k Keeper) GetCurrentPrice(ctx sdk.Context, token Token) CurrentPrice {
+	store := ctx.KVStore(k.storeKey)
+	var storedPriceKey := ""
+	if token.TokenType() == "NFT" {
+		storedPriceKey = CurrentPricePrefix + token.GetName() + "++" + token.GetID()
+ 	} else {
+		storedPriceKey = CurrentPricePrefix + token.GetName()
+	}
+
+	bz := store.Get([]byte(storedPriceKey))
 	// TODO panic or return error if not found
 	var price CurrentPrice
 	k.cdc.MustUnmarshalBinaryBare(bz, &price)
+	if price == 0.0 {
+		if token.TokenType() == "NFT" {
+			k.SetOracleMsg(ctx sdk.Context, storedPriceKey)
+		}
+	} 
 	return price
 }
 
