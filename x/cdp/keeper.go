@@ -3,6 +3,7 @@ package cdp
 import (
 	"bytes"
 	"fmt"
+	"github.com/kava-labs/kava-devnet/blockchain/x/cdp/client"
 	"sort"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -38,19 +39,19 @@ func NewKeeper(cdc *codec.Codec, storeKey sdk.StoreKey, subspace params.Subspace
 
 // ModifyCDP creates, changes, or deletes a CDP
 // TODO can/should this function be split up?
-func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string, changeInCollateral sdk.Int, changeInDebt sdk.Int) sdk.Error {
+func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralToken client.Token, changeInCollateral sdk.Int, changeInDebt sdk.Int) sdk.Error {
 
 	// Phase 1: Get state, make changes in memory and check if they're ok.
 
 	// Check collateral type ok
 	p := k.GetParams(ctx)
-	if !p.IsCollateralPresent(collateralDenom) { // maybe abstract this logic into GetCDP
+	if !p.IsCollateralPresent(collateralToken.GetName()) { // maybe abstract this logic into GetCDP
 		return sdk.ErrInternal("collateral type not enabled to create CDPs")
 	}
 
 	// Check the owner has enough collateral and stable coins
 	if changeInCollateral.IsPositive() { // adding collateral to CDP
-		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralDenom, changeInCollateral)))
+		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralToken.GetName(), changeInCollateral)))
 		if !ok {
 			return sdk.ErrInsufficientCoins("not enough collateral in sender's account")
 		}
@@ -64,9 +65,9 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom
 
 	// Change collateral and debt recorded in CDP
 	// Get CDP (or create if not exists)
-	cdp, found := k.GetCDP(ctx, owner, collateralDenom)
+	cdp, found := k.GetCDP(ctx, owner, collateralToken.GetName())
 	if !found {
-		cdp = CDP{Owner: owner, CollateralDenom: collateralDenom, CollateralAmount: sdk.ZeroInt(), Debt: sdk.ZeroInt()}
+		cdp = CDP{Owner: owner, CollateralToken: collateralToken, CollateralDenom: collateralToken.GetName(), CollateralAmount: sdk.ZeroInt(), Debt: sdk.ZeroInt()}
 	}
 	// Add/Subtract collateral and debt
 	cdp.CollateralAmount = cdp.CollateralAmount.Add(changeInCollateral)
@@ -78,7 +79,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom
 		return sdk.ErrInternal("can't pay back more debt than exists in CDP")
 	}
 	isUnderCollateralized := cdp.IsUnderCollateralized(
-		k.pricefeed.GetCurrentPrice(ctx, cdp.CollateralDenom).Price,
+		k.pricefeed.GetCurrentPrice(ctx, cdp.CollateralToken).Price,
 		p.GetCollateralParams(cdp.CollateralDenom).LiquidationRatio,
 	)
 	if isUnderCollateralized {
@@ -114,9 +115,9 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom
 	// change owner's coins (increase or decrease)
 	var err sdk.Error
 	if changeInCollateral.IsNegative() {
-		_, err = k.bank.AddCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralDenom, changeInCollateral.Neg())))
+		_, err = k.bank.AddCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralToken.GetName(), changeInCollateral.Neg())))
 	} else {
-		_, err = k.bank.SubtractCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralDenom, changeInCollateral)))
+		_, err = k.bank.SubtractCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralToken.GetName(), changeInCollateral)))
 	}
 	if err != nil {
 		panic(err) // this shouldn't happen because coin balance was checked earlier

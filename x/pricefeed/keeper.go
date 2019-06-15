@@ -1,6 +1,7 @@
 package pricefeed
 
 import (
+	"github.com/kava-labs/kava-devnet/blockchain/x/cdp/client"
 	"sort"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -228,7 +229,7 @@ func (k Keeper) GetOracle(ctx sdk.Context, oracle string) (Oracle, bool) {
 }
 
 // GetCurrentPrice fetches the current median price of all oracles for a specific asset
-func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string) CurrentPrice {
+func (k Keeper) GetCurrentPrice(ctx sdk.Context, collateralToken client.Token) CurrentPrice {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get([]byte(CurrentPricePrefix + assetCode))
 	// TODO panic or return error if not found

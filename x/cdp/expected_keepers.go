@@ -2,6 +2,7 @@ package cdp
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/kava-labs/kava-devnet/blockchain/x/cdp/client"
 	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
 )
 
@@ -13,7 +14,7 @@ type bankKeeper interface {
 }
 
 type pricefeedKeeper interface {
-	GetCurrentPrice(sdk.Context, string) pricefeed.CurrentPrice
+	GetCurrentPrice(sdk.Context, client.Token) pricefeed.CurrentPrice
 	// These are used for testing TODO replace mockApp with keeper in tests to remove these
 	AddAsset(sdk.Context, string, string)
 	SetPrice(sdk.Context, sdk.AccAddress, string, sdk.Dec, sdk.Int) (pricefeed.PostedPrice, sdk.Error)
