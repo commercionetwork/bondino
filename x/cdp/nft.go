@@ -9,8 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const _NFT = "NFT"
-
 // NFT non fungible token interface
 type NFT interface {
 	GetID() string

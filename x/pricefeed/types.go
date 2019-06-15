@@ -30,6 +30,13 @@ type PostedPrice struct {
 	Expiry        sdk.Int `json:"expiry"`
 }
 
+// PendingEstimableAsset struct that contains asset to estimate and the information about the estimated.
+type EstimableAsset struct {
+	OracleAddress string `json:"oracle_address"`
+	AssetCode     string `json:"asset_code"`
+	Estimed       string `json:"estimed"`
+}
+
 // SortDecs provides the interface needed to sort sdk.Dec slices
 type SortDecs []sdk.Dec
 

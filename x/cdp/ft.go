@@ -1,7 +1,5 @@
 package cdp
 
-const _FT = "FT"
-
 type FT interface {
 	GetName() string
 }

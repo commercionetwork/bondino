@@ -1,6 +1,9 @@
 package pricefeed
 
 import (
+	"errors"
+	"fmt"
+	"github.com/kava-labs/kava-devnet/blockchain/x/cdp"
 	"github.com/kava-labs/kava-devnet/blockchain/x/cdp/client"
 	"sort"
 
@@ -36,21 +39,25 @@ const (
 
 	// OraclePrefix store prefix for the oracle accounts
 	OraclePrefix = StoreKey + ":oracles"
+
+	// EstimableAssetPrefix store prefix for the estimable assets
+	EstimableAssetPrefix = StoreKey + ":estimableassets"
 )
 
 // Keeper struct for pricefeed module
 type Keeper struct {
-	storeKey  sdk.StoreKey
-	cdc       *codec.Codec
-	codespace sdk.CodespaceType
+	cdp           cdp.Keeper
+	priceStoreKey sdk.StoreKey
+	cdc           *codec.Codec
+	codespace     sdk.CodespaceType
 }
 
 // NewKeeper returns a new keeper for the pricefeed modle
 func NewKeeper(storeKey sdk.StoreKey, cdc *codec.Codec, codespace sdk.CodespaceType) Keeper {
 	return Keeper{
-		storeKey:  storeKey,
-		cdc:       cdc,
-		codespace: codespace,
+		priceStoreKey: storeKey,
+		cdc:           cdc,
+		codespace:     codespace,
 	}
 }
 
@@ -59,36 +66,31 @@ func (k Keeper) AddOracle(ctx sdk.Context, address string) {
 
 	oracles := k.GetOracles(ctx)
 	oracles = append(oracles, Oracle{OracleAddress: address})
-	store := ctx.KVStore(k.storeKey)
+	store := ctx.KVStore(k.priceStoreKey)
 	store.Set(
 		[]byte(OraclePrefix), k.cdc.MustMarshalBinaryBare(oracles),
 	)
 }
 
 // AddAsset adds an asset to the store
-func (k Keeper) AddAsset(
-	ctx sdk.Context,
-	assetCode string,
-	desc string,
-) {
+func (k Keeper) AddAsset(ctx sdk.Context, assetCode string, desc string) {
 	assets := k.GetAssets(ctx)
 	assets = append(assets, Asset{AssetCode: assetCode, Description: desc})
-	store := ctx.KVStore(k.storeKey)
-	store.Set(
-		[]byte(AssetPrefix), k.cdc.MustMarshalBinaryBare(assets),
-	)
+	store := ctx.KVStore(k.priceStoreKey)
+	store.Set([]byte(AssetPrefix), k.cdc.MustMarshalBinaryBare(assets))
 }
 
+/*
+SetPrice deve essere modificato perché non è sufficiente l'assetCode
+Nel caso di NFT deve minimo essere passato in maniera separate il tipo di NFT e l'ID
+
+
+*/
 // SetPrice updates the posted price for a specific oracle
-func (k Keeper) SetPrice(
-	ctx sdk.Context,
-	oracle sdk.AccAddress,
-	assetCode string,
-	price sdk.Dec,
-	expiry sdk.Int) (PostedPrice, sdk.Error) {
+func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetCode string, price sdk.Dec, expiry sdk.Int) (PostedPrice, sdk.Error) {
 	// If the expiry is less than or equal to the current blockheight, we consider the price valid
 	if expiry.GTE(sdk.NewInt(ctx.BlockHeight())) {
-		store := ctx.KVStore(k.storeKey)
+		store := ctx.KVStore(k.priceStoreKey)
 		prices := k.GetRawPrices(ctx, assetCode)
 		var index int
 		found := false
@@ -103,25 +105,24 @@ func (k Keeper) SetPrice(
 		if found {
 			prices[index] = PostedPrice{AssetCode: assetCode, OracleAddress: oracle.String(), Price: price, Expiry: expiry}
 		} else {
-			prices = append(prices, PostedPrice{
-				assetCode, oracle.String(), price, expiry,
-			})
+			prices = append(prices, PostedPrice{assetCode, oracle.String(), price, expiry})
 			index = len(prices) - 1
 		}
 
-		store.Set(
-			[]byte(RawPriceFeedPrefix+assetCode), k.cdc.MustMarshalBinaryBare(prices),
-		)
+		store.Set([]byte(RawPriceFeedPrefix+assetCode), k.cdc.MustMarshalBinaryBare(prices))
+
 		return prices[index], nil
 	}
+
 	return PostedPrice{}, ErrExpired(k.codespace)
 
 }
 
-// SetCurrentPrices updates the price of an asset to the meadian of all valid oracle inputs
+// SetCurrentPrices updates the price of an asset to the median of all valid oracle inputs
 func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 	assets := k.GetAssets(ctx)
 	for _, v := range assets {
+		// NON è sufficiente per l'NFT
 		assetCode := v.AssetCode
 		prices := k.GetRawPrices(ctx, assetCode)
 		var notExpiredPrices []CurrentPrice
@@ -141,7 +142,9 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 		// TODO make threshold for acceptance (ie. require 51% of oracles to have posted valid prices
 		if l == 0 {
 			// Error if there are no valid prices in the raw pricefeed
-			return ErrNoValidPrice(k.codespace)
+			// return ErrNoValidPrice(k.codespace)
+			medianPrice = sdk.NewDec(0)
+			expiry = sdk.NewInt(0)
 		} else if l == 1 {
 			// Return immediately if there's only one price
 			medianPrice = notExpiredPrices[0].Price
@@ -170,7 +173,7 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 			}
 		}
 
-		store := ctx.KVStore(k.storeKey)
+		store := ctx.KVStore(k.priceStoreKey)
 		currentPrice := CurrentPrice{
 			AssetCode: assetCode,
 			Price:     medianPrice,
@@ -185,8 +188,18 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 }
 
 // GetOracles returns the oracles in the pricefeed store
+func (k Keeper) GetEstimableAssets(ctx sdk.Context) []EstimableAsset {
+	store := ctx.KVStore(k.priceStoreKey)
+	//todo not sure of passing estimableAssPrefixx to get
+	bz := store.Get([]byte(EstimableAssetPrefix))
+	var estimableAssets []EstimableAsset
+	k.cdc.MustUnmarshalBinaryBare(bz, &estimableAssets)
+	return estimableAssets
+}
+
+// GetOracles returns the oracles in the pricefeed store
 func (k Keeper) GetOracles(ctx sdk.Context) []Oracle {
-	store := ctx.KVStore(k.storeKey)
+	store := ctx.KVStore(k.priceStoreKey)
 	bz := store.Get([]byte(OraclePrefix))
 	var oracles []Oracle
 	k.cdc.MustUnmarshalBinaryBare(bz, &oracles)
@@ -195,7 +208,7 @@ func (k Keeper) GetOracles(ctx sdk.Context) []Oracle {
 
 // GetAssets returns the assets in the pricefeed store
 func (k Keeper) GetAssets(ctx sdk.Context) []Asset {
-	store := ctx.KVStore(k.storeKey)
+	store := ctx.KVStore(k.priceStoreKey)
 	bz := store.Get([]byte(AssetPrefix))
 	var assets []Asset
 	k.cdc.MustUnmarshalBinaryBare(bz, &assets)
@@ -228,19 +241,67 @@ func (k Keeper) GetOracle(ctx sdk.Context, oracle string) (Oracle, bool) {
 
 }
 
+// Deve essere estratto l'oracolo preposto a valutare quel tipo di NFT
+// poi deve essere registrato un msg con l'indicazione del tipo di NFT,
+// il suo ID, l'oracolo preposto e il fatto che sia o meno stato valutato
+// Questo elemento del keystore serve per restitutire un messaggio agli oracoli perché valutino l'NFT
+func (k Keeper) SetOracleMsg(ctx sdk.Context, token client.Token) CurrentPrice {
+	/*
+		1) Dal token estraggo il tipo di NFT
+		2) Ricerco tra gli oracoli quello preposto per il tipo di NFT: ottengo l'address
+		3) Registro un elemento in EstimableAsset (da cambiare la struttura) con Estimed che indica che non è stato stimato
+		4) Successivamente EstimableAsset deve essere interrogato passando l'address dell'oracolo che saprà quali sono gli assets
+		da valutare.
+		5) L'oracolo fa la stima del prezzo e inserisce tramite una transazione che inserisce la stima del prezzo.
+		6) Viene settato il prezzo dell'NFT
+		7) Viene portato a true Estimed del EstimableAsset del punto 3
+
+
+
+	*/
+
+	/*
+		var oracles []Oracle
+		esitimableAssets := k.GetEstimableAssets(ctx)
+		esitimableAssets = append(esitimableAssets, EstimableAsset{OracleAddress: oracleAddr, AssetCode: storedPriceKey, Estimed: false})
+		store := ctx.KVStore(k.priceStoreKey)
+		store.Set(
+			[]byte(EstimableAssetPrefix), k.cdc.MustMarshalBinaryBare(esitimableAssets),
+		)*/
+}
+
 // GetCurrentPrice fetches the current median price of all oracles for a specific asset
-func (k Keeper) GetCurrentPrice(ctx sdk.Context, collateralToken client.Token) CurrentPrice {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get([]byte(CurrentPricePrefix + assetCode))
-	// TODO panic or return error if not found
+func (k Keeper) GetCurrentPrice(ctx sdk.Context, token client.Token) CurrentPrice {
+
+	store := ctx.KVStore(k.priceStoreKey)
+	var storedPriceKey string
+
+	switch token := token.(type) {
+	case cdp.BaseNFT:
+		storedPriceKey = CurrentPricePrefix + token.GetName() + "++" + token.GetID()
+	case cdp.BaseFT:
+		storedPriceKey = CurrentPricePrefix + token.GetName()
+	default:
+		panic(errors.New("Unrecognized cdp token type"))
+	}
+
+	bz := store.Get([]byte(storedPriceKey))
+
 	var price CurrentPrice
 	k.cdc.MustUnmarshalBinaryBare(bz, &price)
+
+	if price.Price.IsZero() {
+		if token.TokenType() == _NFT {
+			k.SetOracleMsg(ctx, token)
+		}
+	}
+
 	return price
 }
 
 // GetRawPrices fetches the set of all prices posted by oracles for an asset
 func (k Keeper) GetRawPrices(ctx sdk.Context, assetCode string) []PostedPrice {
-	store := ctx.KVStore(k.storeKey)
+	store := ctx.KVStore(k.priceStoreKey)
 	bz := store.Get([]byte(RawPriceFeedPrefix + assetCode))
 	var prices []PostedPrice
 	k.cdc.MustUnmarshalBinaryBare(bz, &prices)
