@@ -9,14 +9,14 @@ import (
 )
 
 var (
-	_ sdk.AppModule      = AppModule{}
-	_ sdk.AppModuleBasic = AppModuleBasic{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}	
 )
 
 // AppModuleBasic app module basics object
 type AppModuleBasic struct{}
 
-var _ sdk.AppModuleBasic = AppModuleBasic{}
+var _ module.AppModuleBasic = AppModuleBasic{}
 
 // Name get module name
 func (AppModuleBasic) Name() string {
@@ -43,6 +43,20 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	return ValidateGenesis(data)
 }
 
+// register rest routes
+func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr)
+}
+
+// get the root tx command of this module
+func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetTxCmd(cdc)
+}
+
+// get the root query command of this module
+func (AppModuleBasic) GetQueryCmd(_ *codec.Codec) *cobra.Command { return nil }
+
+
 // AppModule app module type
 type AppModule struct {
 	AppModuleBasic
@@ -63,12 +77,10 @@ func (AppModule) Name() string {
 }
 
 // RegisterInvariants register module invariants
-func (AppModule) RegisterInvariants(_ sdk.InvariantRouter) {}
+func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // Route module message route name
-func (AppModule) Route() string {
-	return ModuleName
-}
+func (AppModule) Route() string { return "" }
 
 // NewHandler module handler
 func (am AppModule) NewHandler() sdk.Handler {

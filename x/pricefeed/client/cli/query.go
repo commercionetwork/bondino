@@ -5,12 +5,32 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
 	"github.com/spf13/cobra"
 )
 
-// GetCmdCurrentPrice queries the current price of an asset
-func GetCmdCurrentPrice(queryRoute string, cdc *codec.Codec) *cobra.Command {
+
+// GetQueryCmd returns the cli query commands for this module
+func (mc ModuleClient) GetQueryCmd() *cobra.Command {
+	// Group nameservice queries under a subcommand
+	pricefeedQueryCmd := &cobra.Command{
+		Use:   "pricefeed",
+		Short: "Querying commands for the pricefeed module",
+	}
+
+	pricefeedQueryCmd.AddCommand(client.GetCommands(
+		getCmdCurrentPrice(mc.storeKey, mc.cdc),
+		getCmdRawPrices(mc.storeKey, mc.cdc),
+		getCmdAssets(mc.storeKey, mc.cdc),
+	)...)
+
+	return pricefeedQueryCmd
+}
+
+
+
+
+// getCmdCurrentPrice queries the current price of an asset
+func getCmdCurrentPrice(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "price [assetCode]",
 		Short: "get the current price of an asset",
@@ -31,8 +51,10 @@ func GetCmdCurrentPrice(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	}
 }
 
-// GetCmdRawPrices queries the current price of an asset
-func GetCmdRawPrices(queryRoute string, cdc *codec.Codec) *cobra.Command {
+
+
+// getCmdRawPrices queries the current price of an asset
+func getCmdRawPrices(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "rawprices [assetCode]",
 		Short: "get the raw oracle prices for an asset",
@@ -52,8 +74,8 @@ func GetCmdRawPrices(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	}
 }
 
-// GetCmdAssets queries list of assets in the pricefeed
-func GetCmdAssets(queryRoute string, cdc *codec.Codec) *cobra.Command {
+// getCmdAssets queries list of assets in the pricefeed
+func getCmdAssets(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "assets",
 		Short: "get the assets in the pricefeed",

@@ -8,12 +8,26 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
 	"github.com/spf13/cobra"
 )
 
-// GetCmdPostPrice cli command for posting prices.
-func GetCmdPostPrice(cdc *codec.Codec) *cobra.Command {
+// GetTxCmd returns the transaction commands for this module
+func GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	pricefeedTxCmd := &cobra.Command{
+		Use:   "pricefeed",
+		Short: "Pricefeed transactions subcommands",
+	}
+
+	pricefeedTxCmd.AddCommand(client.PostCommands(
+		pricefeedcmd.getCmdPostPrice(mc.cdc),
+	)...)
+
+	return pricefeedTxCmd
+}
+
+
+// getCmdPostPrice cli command for posting prices.
+func getCmdPostPrice(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "postprice [assetCode] [price] [expiry]",
 		Short: "post the latest price for a particular asset",
