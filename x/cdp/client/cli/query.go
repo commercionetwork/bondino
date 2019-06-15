@@ -36,7 +36,7 @@ func GetCmd_GetCdp(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 			// Query
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, cdp.QueryGetCdps)
-			res, err := cliCtx.QueryWithData(route, bz)
+			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				fmt.Printf("error when getting cdp info - %s", err)
 				fmt.Printf("could not get current cdp info - %s %s \n", string(ownerAddress), string(collateralType))
@@ -71,7 +71,7 @@ func GetCmd_GetCdps(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 			// Query
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, cdp.QueryGetCdps)
-			res, err := cliCtx.QueryWithData(route, bz)
+			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
 			}
@@ -108,7 +108,7 @@ func GetCmd_GetUnderCollateralizedCdps(queryRoute string, cdc *codec.Codec) *cob
 
 			// Query
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, cdp.QueryGetCdps)
-			res, err := cliCtx.QueryWithData(route, bz)
+			res, _, err := cliCtx.QueryWithData(route, bz)
 			if err != nil {
 				return err
 			}
@@ -132,7 +132,7 @@ func GetCmd_GetParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
 
 			// Query
 			route := fmt.Sprintf("custom/%s/%s", queryRoute, cdp.QueryGetParams)
-			res, err := cliCtx.QueryWithData(route, nil) // TODO use cliCtx.QueryStore?
+			res, _, err := cliCtx.QueryWithData(route, nil) // TODO use cliCtx.QueryStore?
 			if err != nil {
 				return err
 			}
