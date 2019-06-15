@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -12,8 +13,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// GetCmdModifyCdp cli command for creating and modifying cdps.
-func GetCmdModifyCdp(cdc *codec.Codec) *cobra.Command {
+// GetTxCmd returns the transaction commands for this module
+func GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	cdpTxCmd := &cobra.Command{
+		Use:   "cdp",
+		Short: "cdp transactions subcommands",
+	}
+
+	cdpTxCmd.AddCommand(client.PostCommands(
+		getCmdModifyCdp(cdc),
+	)...)
+
+	return cdpTxCmd
+}
+
+// getCmdModifyCdp cli command for creating and modifying cdps.
+func getCmdModifyCdp(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "modifycdp [ownerAddress] [collateralType] [collateralChange] [debtChange]",
 		Short: "create or modify a cdp",

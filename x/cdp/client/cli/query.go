@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -11,8 +12,26 @@ import (
 	"github.com/kava-labs/kava-devnet/blockchain/x/cdp"
 )
 
-// GetCmd_GetCdp queries the latest info about a particular cdp
-func GetCmd_GetCdp(queryRoute string, cdc *codec.Codec) *cobra.Command {
+// GetQueryCmd returns the cli query commands for this module
+func GetQueryCmd(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	// Group nameservice queries under a subcommand
+	cdpQueryCmd := &cobra.Command{
+		Use:   "cdp",
+		Short: "Querying commands for the cdp module",
+	}
+
+	cdpQueryCmd.AddCommand(client.GetCommands(
+		getCmdQueryGetCdp(queryRoute, cdc),
+		getCmdQueryGetCdps(queryRoute, cdc),
+		getCmdQueryGetUnderCollateralizedCdps(queryRoute, cdc),
+		getCmdQueryGetParams(queryRoute, cdc),
+	)...)
+
+	return cdpQueryCmd
+}
+
+// getCmdQueryGetCdp queries the latest info about a particular cdp
+func getCmdQueryGetCdp(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "cdp [ownerAddress] [collateralType]",
 		Short: "get info about a cdp",
@@ -54,7 +73,7 @@ func GetCmd_GetCdp(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	}
 }
 
-func GetCmd_GetCdps(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdQueryGetCdps(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "cdps [collateralType]",
 		Short: "get info about many cdps",
@@ -84,7 +103,7 @@ func GetCmd_GetCdps(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	}
 }
 
-func GetCmd_GetUnderCollateralizedCdps(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdQueryGetUnderCollateralizedCdps(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "bad-cdps [collateralType] [price]",
 		Short: "get under collateralized CDPs",
@@ -121,7 +140,7 @@ func GetCmd_GetUnderCollateralizedCdps(queryRoute string, cdc *codec.Codec) *cob
 	}
 }
 
-func GetCmd_GetParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
+func getCmdQueryGetParams(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
 		Use:   "params",
 		Short: "get the cdp module parameters",

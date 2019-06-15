@@ -59,11 +59,13 @@ func (AppModuleBasic) RegisterRESTRoutes(context context.CLIContext, r *mux.Rout
 
 // get the root tx command of this module
 func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetCmdModifyCdp(cdc)
+	return cli.GetTxCmd(cdc)
 }
 
 // get the root query command of this module
-func (AppModuleBasic) GetQueryCmd(_ *codec.Codec) *cobra.Command { return nil }
+func (AppModuleBasic) GetQueryCmd(codec *codec.Codec) *cobra.Command {
+	return cli.GetQueryCmd(ModuleName, codec)
+}
 
 // AppModule app module type
 type AppModule struct {
