@@ -2,6 +2,12 @@ package cdp
 
 import (
 	"encoding/json"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/cdp/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/cdp/client/rest"
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,8 +15,8 @@ import (
 )
 
 var (
-	_ sdk.AppModule      = AppModule{}
-	_ sdk.AppModuleBasic = AppModuleBasic{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 //  ModuleName name of module
@@ -19,7 +25,7 @@ const ModuleName = "cdp"
 // AppModuleBasic app module basics object
 type AppModuleBasic struct{}
 
-var _ sdk.AppModuleBasic = AppModuleBasic{}
+var _ module.AppModuleBasic = AppModuleBasic{}
 
 // Name get module name
 func (AppModuleBasic) Name() string {
@@ -46,6 +52,21 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	return ValidateGenesis(data)
 }
 
+// register rest routes
+func (AppModuleBasic) RegisterRESTRoutes(context context.CLIContext, r *mux.Router) {
+	rest.RegisterRoutes(context, r)
+}
+
+// get the root tx command of this module
+func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetTxCmd(cdc)
+}
+
+// get the root query command of this module
+func (AppModuleBasic) GetQueryCmd(codec *codec.Codec) *cobra.Command {
+	return cli.GetQueryCmd(ModuleName, codec)
+}
+
 // AppModule app module type
 type AppModule struct {
 	AppModuleBasic
@@ -66,7 +87,7 @@ func (AppModule) Name() string {
 }
 
 // RegisterInvariants register module invariants
-func (AppModule) RegisterInvariants(_ sdk.InvariantRouter) {}
+func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // Route module message route name
 func (AppModule) Route() string {
