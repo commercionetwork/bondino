@@ -16,20 +16,20 @@ import (
 
 // RegisterRoutes - Central function to define routes that get registered by the main application
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) {
-	r.HandleFunc("/liquidator/outstandingdebt", queryDebtHandlerFn(cdc, cliCtx)).Methods("GET")
+	r.HandleFunc("/liquidator/outstandingdebt", queryDebtHandlerFn(cliCtx)).Methods("GET")
 	r.HandleFunc("/liquidator/seize", seizeCdpHandlerFn(cdc, cliCtx)).Methods("POST")
 	r.HandleFunc("/liquidator/mint", debtAuctionHandlerFn(cdc, cliCtx)).Methods("POST")
 	// r.HandleFunc("liquidator/burn", surplusAuctionHandlerFn(cdc, cliCtx).Methods("POST"))
 }
 
-func queryDebtHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
+func queryDebtHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/liquidator/%s", liquidator.QueryGetOutstandingDebt), nil)
+		res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/liquidator/%s", liquidator.QueryGetOutstandingDebt), nil)
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-		rest.PostProcessResponse(w, cdc, res, cliCtx.Indent) // write JSON to response writer
+		rest.PostProcessResponse(w, cliCtx, res) // write JSON to response writer
 	}
 }
 
@@ -64,7 +64,7 @@ func seizeCdpHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handler
 		}
 
 		// Generate tx and write response
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		clientrest.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
 
@@ -95,6 +95,6 @@ func debtAuctionHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 		}
 
 		// Generate tx and write response
-		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
+		clientrest.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }

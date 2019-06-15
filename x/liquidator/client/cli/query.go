@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,6 +10,20 @@ import (
 
 	"github.com/kava-labs/kava-devnet/blockchain/x/liquidator"
 )
+
+// GetQueryCmd returns the cli query commands for this module
+func GetQueryCmd(storeKey string, cdc *codec.Codec) *cobra.Command {
+	queryCmd := &cobra.Command{
+		Use:   "liquidator",
+		Short: "Querying commands for the liquidator module",
+	}
+
+	queryCmd.AddCommand(client.GetCommands(
+		GetCmd_GetOutstandingDebt(storeKey, cdc),
+	)...)
+
+	return queryCmd
+}
 
 // GetCmd_GetOutstandingDebt queries for the remaining available debt in the liquidator module after settlement with the module's stablecoin balance.
 func GetCmd_GetOutstandingDebt(queryRoute string, cdc *codec.Codec) *cobra.Command {
@@ -21,7 +35,7 @@ func GetCmd_GetOutstandingDebt(queryRoute string, cdc *codec.Codec) *cobra.Comma
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
-			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, liquidator.QueryGetOutstandingDebt), nil)
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/%s", queryRoute, liquidator.QueryGetOutstandingDebt), nil)
 			if err != nil {
 				return err
 			}

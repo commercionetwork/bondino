@@ -1,15 +1,32 @@
 package cli
 
 import (
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/kava-labs/kava-devnet/blockchain/x/liquidator/client/cli"
 	"github.com/spf13/cobra"
 
 	"github.com/kava-labs/kava-devnet/blockchain/x/liquidator"
 )
+
+// GetTxCmd returns the transaction commands for this module
+func GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	txCmd := &cobra.Command{
+		Use:   "liquidator",
+		Short: "Liquidator transactions subcommands",
+	}
+
+	txCmd.AddCommand(client.PostCommands(
+		cli.GetCmd_SeizeAndStartCollateralAuction(cdc),
+		cli.GetCmd_StartDebtAuction(cdc),
+	)...)
+
+	return txCmd
+}
 
 func GetCmd_SeizeAndStartCollateralAuction(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
@@ -23,7 +40,7 @@ As this is a forward-reverse auction type, if the max stable coin is bid then bi
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Setup
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc)) //NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().
 				WithCodec(cdc).
 				WithAccountDecoder(cdc)
@@ -58,7 +75,7 @@ func GetCmd_StartDebtAuction(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Setup
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			sender := cliCtx.GetFromAddress()

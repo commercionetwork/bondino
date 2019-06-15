@@ -3,40 +3,45 @@ package liquidator
 import (
 	"encoding/json"
 
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
+	abci "github.com/tendermint/tendermint/abci/types"
+
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
+
+	"github.com/cosmos/cosmos-sdk/x/liquidator/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/liquidator/client/rest"
 )
 
 var (
-	_ sdk.AppModule      = AppModule{}
-	_ sdk.AppModuleBasic = AppModuleBasic{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
-//  ModuleName name of module
-const ModuleName = "liquidator"
-
-// AppModuleBasic app module basics object
+// app module basics object
 type AppModuleBasic struct{}
 
-var _ sdk.AppModuleBasic = AppModuleBasic{}
+var _ module.AppModuleBasic = AppModuleBasic{}
 
-// Name get module name
+// module name
 func (AppModuleBasic) Name() string {
 	return ModuleName
 }
 
-// RegisterCodec register module codec
+// register module codec
 func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
 	RegisterCodec(cdc)
 }
 
-// DefaultGenesis default genesis state
+// default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
 	return moduleCdc.MustMarshalJSON(DefaultGenesisState())
 }
 
-// ValidateGenesis module validate genesis
+// module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	var data GenesisState
 	err := moduleCdc.UnmarshalJSON(bz, &data)
@@ -45,6 +50,22 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	}
 	return ValidateGenesis(data)
 }
+
+// register rest routes
+func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr, moduleCdc)
+}
+
+func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetTxCmd(cdc)
+}
+
+func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetQueryCmd(ModuleName, cdc)
+}
+
+//_____________________________
+// app module object
 
 // AppModule app module type
 type AppModule struct {
@@ -60,35 +81,33 @@ func NewAppModule(keeper Keeper) AppModule {
 	}
 }
 
-// Name module name
+// module name
 func (AppModule) Name() string {
 	return ModuleName
 }
 
-// RegisterInvariants register module invariants
-func (AppModule) RegisterInvariants(_ sdk.InvariantRouter) {}
+// register invariants
+func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// Route module message route name
-func (AppModule) Route() string {
-	return ModuleName
-}
+// message route name
+func (AppModule) Route() string { return ModuleName }
 
-// NewHandler module handler
+// module handler
 func (am AppModule) NewHandler() sdk.Handler {
 	return NewHandler(am.keeper)
 }
 
-// QuerierRoute module querier route name
+// module querier route name
 func (AppModule) QuerierRoute() string {
 	return ModuleName
 }
 
-// NewQuerierHandler module querier
+// module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.keeper)
 }
 
-// InitGenesis module init-genesis
+// module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
 	moduleCdc.MustUnmarshalJSON(data, &genesisState)
@@ -97,18 +116,18 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 	return []abci.ValidatorUpdate{}
 }
 
-// ExportGenesis module export genesis
+// module export genesis
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.keeper)
 	return moduleCdc.MustMarshalJSON(gs)
 }
 
-// BeginBlock module begin-block
+// module begin-block
 func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) sdk.Tags {
 	return sdk.EmptyTags()
 }
 
-// EndBlock module end-block
+// module end-block
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) ([]abci.ValidatorUpdate, sdk.Tags) {
-	return []abci.ValidatorUpdate{}, sdk.Tags{}
+	return []abci.ValidatorUpdate{}, sdk.EmptyTags()
 }
