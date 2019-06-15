@@ -2,15 +2,20 @@ package auction
 
 import (
 	"encoding/json"
-
+	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/x/auction/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/auction/client/rest"
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 var (
-	_ sdk.AppModule      = AppModule{}
-	_ sdk.AppModuleBasic = AppModuleBasic{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 //  ModuleName name of module
@@ -19,7 +24,7 @@ const ModuleName = "auction"
 // AppModuleBasic app module basics object
 type AppModuleBasic struct{}
 
-var _ sdk.AppModuleBasic = AppModuleBasic{}
+var _ module.AppModuleBasic = AppModuleBasic{}
 
 // Name get module name
 func (AppModuleBasic) Name() string {
@@ -39,6 +44,21 @@ func (AppModuleBasic) DefaultGenesis() json.RawMessage {
 // ValidateGenesis module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	return nil
+}
+
+// register rest routes
+func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
+	rest.RegisterRoutes(ctx, rtr)
+}
+
+// get the root tx command of this module
+func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
+	return cli.GetTxCmd(cdc)
+}
+
+// get the root query command of this module
+func (AppModuleBasic) GetQueryCmd(codec *codec.Codec) *cobra.Command {
+	return cli.GetQueryCmd(ModuleName, codec)
 }
 
 // AppModule app module type
@@ -61,7 +81,7 @@ func (AppModule) Name() string {
 }
 
 // RegisterInvariants register module invariants
-func (AppModule) RegisterInvariants(_ sdk.InvariantRouter) {}
+func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
 // Route module message route name
 func (AppModule) Route() string {
