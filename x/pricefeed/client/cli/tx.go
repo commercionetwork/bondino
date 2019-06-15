@@ -2,12 +2,14 @@ package cli
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/x/pricefeed"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
+	auth "github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +21,7 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	pricefeedTxCmd.AddCommand(client.PostCommands(
-		pricefeedcmd.getCmdPostPrice(mc.cdc),
+		getCmdPostPrice(cdc),
 	)...)
 
 	return pricefeedTxCmd
@@ -34,7 +36,7 @@ func getCmdPostPrice(cdc *codec.Codec) *cobra.Command {
 		Args:  cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
-			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
+			txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
 			if err := cliCtx.EnsureAccountExists(); err != nil {
 				return err
 			}
