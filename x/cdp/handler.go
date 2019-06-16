@@ -21,7 +21,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 
 func handleMsgCreateOrModifyCDP(ctx sdk.Context, keeper Keeper, msg MsgCreateOrModifyCDP) sdk.Result {
 
-	err := keeper.ModifyCDP(ctx, msg.Sender, msg.CollateralToken, msg.CollateralChange, msg.DebtChange)
+	err := keeper.ModifyCDP(ctx, msg.Sender, msg.Collateral, msg.Liquidity)
 	if err != nil {
 		return err.Result()
 	}

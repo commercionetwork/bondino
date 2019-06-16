@@ -11,7 +11,7 @@ import (
 type Collateral struct {
 	Token        token.Token `json:"token"`
 	Qty          sdk.Int     `json:"qty"`
-	InitialPrice sdk.Int     `json:"initial_price"`
+	InitialPrice sdk.Dec     `json:"initial_price"`
 }
 
 func (c Collateral) String() string {
@@ -23,6 +23,13 @@ func (c Collateral) String() string {
 		c.Qty,
 		c.InitialPrice,
 	))
+}
+
+//evaluate the collateral amount
+func (c Collateral) Amount() sdk.Dec {
+	decQty := sdk.NewDec(c.Qty.Int64())
+
+	return decQty.Mul(c.InitialPrice)
 }
 
 type Liquidity struct {

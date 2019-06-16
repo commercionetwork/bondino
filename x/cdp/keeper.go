@@ -56,24 +56,21 @@ func (k Keeper) getAssetCodeAndName(token token.Token) (string, string) {
 
 // ModifyCDP creates, changes, or deletes a CDP
 // TODO can/should this function be split up?
-func (k Keeper) ModifyCDP(ctx sdk.Context,
-	owner sdk.AccAddress,
-	collateralToken token.Token,
-	changeInCollateral sdk.Int,
-	changeInDebt sdk.Int,
-) sdk.Error {
+func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Collateral, liquidity Liquidity) sdk.Error {
 
 	// Phase 1: Get state, make changes in memory and check if they're ok.
+	collateralName := collateral.Token.GetName()
+	collateralAmount := collateral.Amount()
 
 	// Check collateral type ok
 	p := k.GetParams(ctx)
-	if !p.IsCollateralPresent(collateralToken.GetName()) { // maybe abstract this logic into GetCDP
+	if !p.IsCollateralPresent(collateralName) { // maybe abstract this logic into GetCDP
 		return sdk.ErrInternal("collateral type not enabled to create CDPs")
 	}
 
 	// Check the owner has enough collateral and stable coins
-	if changeInCollateral.IsPositive() { // adding collateral to CDP
-		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralToken.GetName(), changeInCollateral)))
+	if collateralAmount.IsPositive() { // adding collateral to CDP
+		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralName, changeInCollateral)))
 		if !ok {
 			return sdk.ErrInsufficientCoins("not enough collateral in sender's account")
 		}
@@ -89,7 +86,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context,
 	// Get CDP (or create if not exists)
 	cdp, found := k.GetCDP(ctx, owner, collateralToken.GetName())
 	if !found {
-		cdp = CDP{Owner: owner, CollateralToken: collateralToken, CollateralDenom: collateralToken.GetName(), CollateralAmount: sdk.ZeroInt(), Debt: sdk.ZeroInt()}
+		cdp = CDP{Owner: owner, Collateral: collateralToken, CollateralDenom: collateralToken.GetName(), CollateralAmount: sdk.ZeroInt(), Debt: sdk.ZeroInt()}
 	}
 	// Add/Subtract collateral and debt
 	cdp.CollateralAmount = cdp.CollateralAmount.Add(changeInCollateral)
