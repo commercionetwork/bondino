@@ -49,3 +49,15 @@ See all the deposited funds
 ```bash
 kavacli query pool funds 
 ``` 
+
+### Auction
+🔨 **WIP** 🔨
+
+### Collateralized Debt Position
+🔨 **WIP** 🔨
+
+### Liquidator
+🔨 **WIP** 🔨
+
+### Price feed
+🔨 **WIP** 🔨
