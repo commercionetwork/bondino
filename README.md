@@ -1,5 +1,5 @@
-# Bondino
-This repo contains the code that represents the entry for the 2019 Berlin Cosmos Hackatom from Commercio.network. 
+# ❄️ Bondino ❄️
+This repo contains the code that represents the entry for the 2019 Berlin Cosmos Hackatom from [Commercio.network](https://commercio.network). 
 
 Bodino represents a pool-backed system that allows user to open Credit Debt Positions using any sort of FT as well 
 as NFT.  
@@ -12,6 +12,8 @@ Our work is a fork of [Kava](https://github.com/Kava-Labs/kava-devnet), to which
 
 We also extended the original Kava code in order to support NFTs as well as FTs, even when the prices can not be 
 retrieved immediately but will later be inserted from an external oracle.
+
+Many thanks goes to Ruaridh ([@rhuairahrighairidh](https://github.com/rhuairahrighairidh)) that allowed us to use its code. We couldn't have done it without it! :muscle:
 
 ## Usage
 ### Pool
