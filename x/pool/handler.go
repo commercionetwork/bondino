@@ -42,3 +42,15 @@ func handleMsgWithdrawFund(ctx sdk.Context, keeper Keeper, msg MsgWithdrawFund) 
 
 	return sdk.Result{}
 }
+
+// EndBlocker distributes the rewards
+func EndBlocker(ctx sdk.Context, k Keeper) sdk.Tags {
+
+	// Running in the end blocker ensures that rewards will update at most once per block
+	err := k.DistributeReward(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	return sdk.Tags{}
+}
