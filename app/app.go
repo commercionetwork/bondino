@@ -5,6 +5,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,18 +24,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-
-<<<<<<< Updated upstream
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
-=======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/auction"
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp"
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/liquidator"
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed"
->>>>>>> Stashed changes
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"

@@ -3,10 +3,7 @@ package client
 import (
 	cdpcmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
-<<<<<<< Updated upstream
-=======
-	cdpcmd "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp/client/cli"
->>>>>>> Stashed changes
+
 	"github.com/spf13/cobra"
 	amino "github.com/tendermint/go-amino"
 )

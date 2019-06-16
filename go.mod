@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
 module github.com/commercionetwork/cosmos-hackatom-2019/blockchain
-=======
-module github.com/commercionetwork/cosmos-hackathom-2019/blockchain
->>>>>>> Stashed changes
 
 go 1.12
 

@@ -31,6 +31,7 @@ github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792/go.mod h1:ghJtE
 github.com/btcsuite/winsvc v1.0.0/go.mod h1:jsenWakMcC0zFBFurPLEAyrnc/teJEM1O46fmI40EZs=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
+github.com/commercionetwork/cosmos-hackatom-2019 v0.0.0-20190616005444-e4acb5d4c82d h1:Z9SiaXvasxuikwDsdKsfbJOsx3b0QEvNtt2mjKO1yKs=
 github.com/commercionetwork/cosmos-hackatom-2019 v0.0.0-20190615131701-a074ea57ab7b h1:qtuxBYcACjUyzb25XMmSH+HciQOmJKMZEMH9DET24ng=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=

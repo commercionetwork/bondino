@@ -8,7 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 <<<<<<< Updated upstream
 =======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 >>>>>>> Stashed changes
 	"github.com/spf13/cobra"
 )

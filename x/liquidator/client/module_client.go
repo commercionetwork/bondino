@@ -8,7 +8,7 @@ import (
 <<<<<<< Updated upstream
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client/cli"
 =======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/liquidator/client/cli"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client/cli"
 >>>>>>> Stashed changes
 )
 

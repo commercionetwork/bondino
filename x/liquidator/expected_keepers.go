@@ -1,15 +1,9 @@
 package liquidator
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
-<<<<<<< Updated upstream
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
-=======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/auction"
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp"
->>>>>>> Stashed changes
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type cdpKeeper interface {

@@ -14,7 +14,7 @@ import (
 <<<<<<< Updated upstream
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
 =======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/liquidator"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
 >>>>>>> Stashed changes
 )
 

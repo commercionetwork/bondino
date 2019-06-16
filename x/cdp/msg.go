@@ -1,8 +1,8 @@
 package cdp
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp/client"
 )
 
 // MsgCreateOrModifyCDP creates, adds/removes collateral/stable coin from a cdp

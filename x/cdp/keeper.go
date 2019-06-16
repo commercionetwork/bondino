@@ -3,7 +3,7 @@ package cdp
 import (
 	"bytes"
 	"fmt"
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp/client"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client"
 	"sort"
 
 	"github.com/cosmos/cosmos-sdk/codec"

@@ -11,7 +11,7 @@ import (
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 <<<<<<< Updated upstream
 =======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/auction"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
 >>>>>>> Stashed changes
 	"github.com/spf13/cobra"
 )

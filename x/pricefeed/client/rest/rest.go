@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 <<<<<<< Updated upstream
 =======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 >>>>>>> Stashed changes
 
 	clientrest "github.com/cosmos/cosmos-sdk/client/rest"

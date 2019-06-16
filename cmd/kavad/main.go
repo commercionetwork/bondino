@@ -15,12 +15,7 @@ import (
 	genaccscli "github.com/cosmos/cosmos-sdk/x/auth/genaccounts/client/cli"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 
-<<<<<<< Updated upstream
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/app"
-=======
-
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/app"
->>>>>>> Stashed changes
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/cli"

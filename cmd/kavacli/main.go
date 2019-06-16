@@ -8,7 +8,7 @@ import (
 <<<<<<< Updated upstream
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/app"
 =======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/app"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/app"
 
 >>>>>>> Stashed changes
 
@@ -63,13 +63,13 @@ import (
 	priceclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client"
 	pricerest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client/rest"
 =======
-	auctionclient "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/auction/client"
-	auctionrest "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/auction/client/rest"
-	cdpclient "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp/client"
-	liquidatorclient "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/liquidator/client"
-	liquidatorrest "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/liquidator/client/rest"
-	priceclient "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed/client"
-	pricerest "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed/client/rest"
+	auctionclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client"
+	auctionrest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client/rest"
+	cdpclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client"
+	liquidatorclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client"
+	liquidatorrest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client/rest"
+	priceclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client"
+	pricerest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client/rest"
 
 >>>>>>> Stashed changes
 

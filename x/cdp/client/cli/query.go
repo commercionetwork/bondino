@@ -2,19 +2,13 @@ package cli
 
 import (
 	"fmt"
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
-<<<<<<< Updated upstream
-
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
 )
-=======
-	)
->>>>>>> Stashed changes
 
 // GetCmd_GetCdp queries the latest info about a particular cdp
 func GetCmd_GetCdp(queryRoute string, cdc *codec.Codec) *cobra.Command {

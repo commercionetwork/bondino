@@ -2,7 +2,7 @@ package cdp
 
 import (
 	"fmt"
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp/client"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"

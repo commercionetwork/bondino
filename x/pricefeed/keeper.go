@@ -1,7 +1,7 @@
 package pricefeed
 
 import (
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
 	"sort"
 	"strings"
 
@@ -47,11 +47,11 @@ const (
 
 // Keeper struct for pricefeed module
 type Keeper struct {
-	cdp           			cdp.Keeper
-	priceStoreKey 			sdk.StoreKey
-	pricesRequestsStoreKey  sdk.StoreKey
-	cdc           			*codec.Codec
-	codespace     			sdk.CodespaceType
+	cdp                    cdp.Keeper
+	priceStoreKey          sdk.StoreKey
+	pricesRequestsStoreKey sdk.StoreKey
+	cdc                    *codec.Codec
+	codespace              sdk.CodespaceType
 }
 
 // NewKeeper returns a new keeper for the pricefeed modle
@@ -111,11 +111,11 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 			prices[index] = PostedPrice{AssetCode: assetCode, OracleAddress: oracle.String(), Price: price, Expiry: expiry}
 		} else {
 			prices = append(prices, PostedPrice{
-				AssetName: assetName,
-				AssetCode: assetCode,
+				AssetName:     assetName,
+				AssetCode:     assetCode,
 				OracleAddress: oracle.String(),
-				Price: price,
-				Expiry: expiry,
+				Price:         price,
+				Expiry:        expiry,
 			})
 			index = len(prices) - 1
 		}

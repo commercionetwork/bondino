@@ -5,7 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 <<<<<<< Updated upstream
 =======
-	pricefeedcmd "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed/client/cli"
+	pricefeedcmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client/cli"
 >>>>>>> Stashed changes
 	"github.com/spf13/cobra"
 	amino "github.com/tendermint/go-amino"
