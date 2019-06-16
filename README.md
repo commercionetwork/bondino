@@ -23,7 +23,7 @@ We also aim to re-implement the currently not-working tests, and create other on
 If you are willing to help us, please open an issue for any bug you find, or create a pull request to speed up the overall development of the features 💪
 
 ## 📜 Usage 📜
-### Pool
+### Pool (`x/pool`)
 
 > Allows to deposit and withdraw a given token amount into/from the liquidity pool .
 
@@ -53,22 +53,22 @@ See all the deposited funds
 kavacli query pool funds 
 ``` 
 
-### Auction
+### Auction (`x/auction`)
 > Allows to close a collateralized debt position (CDP). 
 
 🔨 **WIP** 🔨
 
-### Collateralized Debt Position
+### Collateralized Debt Position (`x/dbp`)
 > Allows to open a collateralized debt position (CDP) and later edit it.
 
 🔨 **WIP** 🔨
 
-### Liquidator
+### Liquidator (`x/liquidator`)
 > Allows to automatically liquidate a CDP when some criteria are met (change in the liquidity/collaterals value)
 
 🔨 **WIP** 🔨
 
-### Price feed
+### Price feed (`x/pricefeed`)
 > Allows to fetch the prices of non-fungible and fungible tokens contacting external oracles
 
 🔨 **WIP** 🔨
