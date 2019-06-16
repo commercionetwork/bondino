@@ -3,12 +3,11 @@ package liquidator
 import (
 	"testing"
 
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/mock"
 	"github.com/stretchr/testify/require"
-
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 )
 
 func TestKeeper_SeizeAndStartCollateralAuction(t *testing.T) {

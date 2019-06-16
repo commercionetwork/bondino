@@ -5,6 +5,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,11 +24,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -201,7 +200,7 @@ func NewKavaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 	app.crisisKeeper = crisis.NewKeeper(crisisSubspace, invCheckPeriod, app.distrKeeper,
 		app.bankKeeper, app.feeCollectionKeeper)
 
-	app.pricefeedKeeper = pricefeed.NewKeeper(app.keyPricefeed, app.cdc, pricefeed.DefaultCodespace)
+	app.pricefeedKeeper = pricefeed.NewKeeper(app.keyPricefeed, app.cdc, pricefeed.DefaultCodespace, app.cdpKeeper)
 	app.cdpKeeper = cdp.NewKeeper(
 		app.cdc,
 		app.keyCdp,

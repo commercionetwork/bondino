@@ -3,6 +3,7 @@ package client
 import (
 	pricefeedcmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
+
 	"github.com/spf13/cobra"
 	amino "github.com/tendermint/go-amino"
 )

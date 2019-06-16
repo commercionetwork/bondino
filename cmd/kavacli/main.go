@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	amino "github.com/tendermint/go-amino"
+	"github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/libs/cli"
 
 	at "github.com/cosmos/cosmos-sdk/x/auth"
@@ -50,9 +50,7 @@ import (
 	auctionclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client"
 	auctionrest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client/rest"
 	cdpclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client"
-	cdprest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client/rest"
 	liquidatorclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client"
-	liquidatorrest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client/rest"
 	poolclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pool/client"
 	priceclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client"
 	pricerest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client/rest"
@@ -179,8 +177,7 @@ func registerRoutes(rs *lcd.RestServer) {
 	mintrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 	pricerest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc, "pricefeed")
 	auctionrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
-	cdprest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
-	liquidatorrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
+	//liquidatorrest.RegisterRoutes(rs.CliCtx, rs.Mux, rs.Cdc)
 }
 
 func registerSwaggerUI(rs *lcd.RestServer) {

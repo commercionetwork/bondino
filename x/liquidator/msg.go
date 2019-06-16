@@ -1,6 +1,9 @@
 package liquidator
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
 
 /*
 Message types for starting various auctions.
@@ -16,9 +19,9 @@ Design options and problems:
 */
 
 type MsgSeizeAndStartCollateralAuction struct {
-	Sender          sdk.AccAddress // only needed to pay the tx fees
-	CdpOwner        sdk.AccAddress
-	CollateralDenom string
+	Sender     sdk.AccAddress // only needed to pay the tx fees
+	CdpOwner   sdk.AccAddress
+	Collateral types.Collateral
 }
 
 // Route return the message type used for routing the message.

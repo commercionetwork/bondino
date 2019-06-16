@@ -1,12 +1,11 @@
 package cdp
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/mock"
 	abci "github.com/tendermint/tendermint/abci/types"
-
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 )
 
 // Mock app is an ABCI app with an in memory database.
@@ -28,7 +27,8 @@ func setUpMockAppWithoutGenesis() (*mock.App, Keeper) {
 	// Create keepers
 	keyCDP := sdk.NewKVStoreKey("cdp")
 	keyPriceFeed := sdk.NewKVStoreKey(pricefeed.StoreKey)
-	priceFeedKeeper := pricefeed.NewKeeper(keyPriceFeed, mapp.Cdc, pricefeed.DefaultCodespace)
+
+	priceFeedKeeper := pricefeed.NewKeeper(keyPriceFeed, mapp.Cdc, pricefeed.DefaultCodespace, nil)
 	bankKeeper := bank.NewBaseKeeper(mapp.AccountKeeper, mapp.ParamsKeeper.Subspace(bank.DefaultParamspace), bank.DefaultCodespace)
 	cdpKeeper := NewKeeper(mapp.Cdc, keyCDP, mapp.ParamsKeeper.Subspace("cdpSubspace"), priceFeedKeeper, bankKeeper)
 

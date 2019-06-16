@@ -53,9 +53,9 @@ func postPriceHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerF
 			return
 		}
 
-		price, err := sdk.NewDecFromStr(req.Price)
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		price, ok := sdk.NewIntFromString(req.Price)
+		if !ok {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "bad price")
 			return
 		}
 

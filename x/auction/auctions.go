@@ -28,9 +28,9 @@ type Auction interface {
 type BaseAuction struct {
 	ID         ID
 	Initiator  sdk.AccAddress // Person who starts the auction. Giving away Lot (aka seller in a forward auction)
-	Lot        sdk.Coin       // Amount of coins up being given by initiator (FA - amount for sale by seller, RA - cost of good by buyer (bid))
+	Lot        sdk.Coin       // CollateralValue of coins up being given by initiator (FA - amount for sale by seller, RA - cost of good by buyer (bid))
 	Bidder     sdk.AccAddress // Person who bids in the auction. Receiver of Lot. (aka buyer in forward auction, seller in RA)
-	Bid        sdk.Coin       // Amount of coins being given by the bidder (FA - bid, RA - amount being sold)
+	Bid        sdk.Coin       // CollateralValue of coins being given by the bidder (FA - bid, RA - amount being sold)
 	EndTime    endTime        // Block height at which the auction closes. It closes at the end of this block
 	MaxEndTime endTime        // Maximum closing time. Auctions can close before this but never after.
 }

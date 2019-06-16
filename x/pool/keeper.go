@@ -140,9 +140,7 @@ func (k Keeper) GetAccountFunds(ctx sdk.Context, account sdk.AccAddress) (sdk.Co
 }
 
 // DistributeReward distributes the given reward between all the funders
-func (k Keeper) DistributeReward(ctx sdk.Context, reward sdk.Coin) error {
-
-	totalFunds := sdk.NewInt(0)
+func (k Keeper) DistributeReward(ctx sdk.Context) error {
 
 	// find the total funds for the given reward coin
 	funds, err := k.GetTotalFunds(ctx)
@@ -150,33 +148,33 @@ func (k Keeper) DistributeReward(ctx sdk.Context, reward sdk.Coin) error {
 		return err
 	}
 
-	for _, fund := range funds {
-		if fund.Denom == reward.Denom {
-			totalFunds = fund.Amount
-		}
-	}
-
 	store := ctx.KVStore(k.fundsStoreKey)
 
-	// divide the reward
-	fundersIterator := store.Iterator(nil, nil)
-	for ; fundersIterator.Valid(); fundersIterator.Next() {
+	// iterate over all the funds coins
+	for _, fundCoin := range funds {
 
-		// get the fund
-		funders := fundersIterator.Value()
-		fundValue := store.Get(funders)
+		// divide the reward
+		investorsIterator := store.Iterator(nil, nil)
+		for ; investorsIterator.Valid(); investorsIterator.Next() {
 
-		var fund sdk.Coin
-		k.cdc.MustUnmarshalBinaryBare(fundValue, &fund)
+			// get the fund
+			var fund sdk.Coin
+			k.cdc.MustUnmarshalBinaryBare(investorsIterator.Value(), &fund)
 
-		// compute the divided
-		dividend := fund.Amount.Quo(totalFunds)
+			// update only the same coins, not others
+			if fund.Denom == fundCoin.Denom {
 
-		// add it to the fund
-		fund.Amount = fund.Amount.Add(dividend)
+				// compute the divided
+				dividend := fund.Amount.Quo(fundCoin.Amount)
 
-		// save it inside the store
-		store.Set(funders, k.cdc.MustMarshalBinaryBare(fund))
+				// add it to the fund
+				fund.Amount = fund.Amount.Add(dividend)
+
+				// save it inside the store
+				store.Set(investorsIterator.Key(), k.cdc.MustMarshalBinaryBare(fund))
+			}
+		}
+
 	}
 
 	return nil

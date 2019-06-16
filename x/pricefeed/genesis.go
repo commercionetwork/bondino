@@ -22,7 +22,10 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, genState GenesisState) {
 // DefaultGenesisState returns a default genesis state
 func DefaultGenesisState() GenesisState {
 	return GenesisState{
-		[]Asset{{"btc", "a description"}, {"xrp", "the standard"}},
+		[]Asset{
+			{Type: "ft", AssetName: "btc", Description: "a description"},
+			{Type: "nft", AssetName: "xrp", Description: "the standard"},
+		},
 		[]Oracle{}}
 }
 

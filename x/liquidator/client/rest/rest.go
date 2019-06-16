@@ -1,5 +1,6 @@
 package rest
 
+/*
 import (
 	"fmt"
 	"net/http"
@@ -56,7 +57,7 @@ func seizeCdpHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Handler
 		msg := liquidator.MsgSeizeAndStartCollateralAuction{
 			req.Sender,
 			req.CdpOwner,
-			req.CollateralDenom,
+			req.Colla,
 		}
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -98,3 +99,4 @@ func debtAuctionHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Hand
 		clientrest.WriteGenerateStdTxResponse(w, cdc, cliCtx, req.BaseReq, []sdk.Msg{msg})
 	}
 }
+*/

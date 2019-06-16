@@ -3,6 +3,7 @@ package client
 import (
 	cdpcmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
+
 	"github.com/spf13/cobra"
 	amino "github.com/tendermint/go-amino"
 )
@@ -44,7 +45,8 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 	}
 
 	cdpTxCmd.AddCommand(client.PostCommands(
-		cdpcmd.GetCmdModifyCdp(mc.cdc),
+		cdpcmd.GetCmdModifyFtCdp(mc.cdc),
+		cdpcmd.GetCmdModifyNftCdp(mc.cdc),
 	)...)
 
 	return cdpTxCmd

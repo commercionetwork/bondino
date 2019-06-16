@@ -1,22 +1,23 @@
 package cdp
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // GenesisState is the state that must be provided at genesis.
 type GenesisState struct {
-	CdpModuleParams CdpModuleParams `json:"params"`
-	GlobalDebt      sdk.Int         `json:"global_debt"`
+	CdpModuleParams types.CdpModuleParams `json:"params"`
+	GlobalDebt      sdk.Int               `json:"global_debt"`
 	// don't need to setup CollateralStates as they are created as needed
 }
 
 // DefaultGenesisState returns a default genesis state
 func DefaultGenesisState() GenesisState {
 	return GenesisState{
-		CdpModuleParams{
+		types.CdpModuleParams{
 			GlobalDebtLimit: sdk.NewInt(1000000),
-			CollateralParams: []CollateralParams{
+			CollateralParams: []types.CollateralParams{
 				{
 					Denom:            "btc",
 					LiquidationRatio: sdk.MustNewDecFromStr("1.5"),

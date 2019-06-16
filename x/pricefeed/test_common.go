@@ -23,7 +23,7 @@ func getMockApp(t *testing.T, numGenAccs int, genState GenesisState, genAccs []a
 	mApp := mock.NewApp()
 	RegisterCodec(mApp.Cdc)
 	keyPricefeed := sdk.NewKVStoreKey("pricefeed")
-	keeper := NewKeeper(keyPricefeed, mApp.Cdc, DefaultCodespace)
+	keeper := NewKeeper(keyPricefeed, mApp.Cdc, DefaultCodespace, nil)
 
 	// Register routes
 	mApp.Router().AddRoute(RouterKey, NewHandler(keeper))
