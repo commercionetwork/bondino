@@ -7,15 +7,22 @@ CDPs can be opened even when the price of the token is not established yet.
 Once a price is correctly known, the user that has opened the CDP will automatically receive atoms taken from a pool of 
 investors, based on certain conditions (i.e. the warranty ratio). 
 
-## Credits
+## 📝 Credits 📝
 Our work is a fork of [Kava](https://github.com/Kava-Labs/kava-devnet), to which we added a new module called `pool`.
 
 We also extended the original Kava code in order to support NFTs as well as FTs, even when the prices can not be 
 retrieved immediately but will later be inserted from an external oracle.
 
-Many thanks goes to Ruaridh ([@rhuairahrighairidh](https://github.com/rhuairahrighairidh)) that allowed us to use its code. We couldn't have done it without it! :muscle:
+Many thanks goes to Ruaridh ([@rhuairahrighairidh](https://github.com/rhuairahrighairidh)) that allowed us to use its code. We couldn't have done it without it! 💯
 
-## Usage
+## ⚠️ Warning ⚠️
+This repository in under **heavy** development and **should not** be used in production whatsover. Please not that we will strive to implement all the missing features as soon as possible, and fix all the bugs that are present. 
+
+We also aim to re-implement the currently not-working tests, and create other ones to further improve its stability. 
+
+If you are willing to help us, please open an issue for any bug you find, or create a pull request to speed up the overall development of the features 💪
+
+## 📜 Usage 📜
 ### Pool
 Deposit a given amount 
 ```bash
