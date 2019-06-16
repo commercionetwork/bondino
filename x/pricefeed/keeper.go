@@ -259,7 +259,7 @@ func (k Keeper) GetOracle(ctx sdk.Context, oracle string) (Oracle, bool) {
 // poi deve essere registrato un msg con l'indicazione del tipo di NFT,
 // il suo ID, l'oracolo preposto e il fatto che sia o meno stato valutato
 // Questo elemento del keystore serve per restitutire un messaggio agli oracoli perché valutino l'NFT
-func (k Keeper) askForPrice(ctx sdk.Context, assetCode string, assetName string) {
+func (k Keeper) AskForPrice(ctx sdk.Context, assetCode string, assetName string) {
 
 	// recover the existing prices, if any
 	store := ctx.KVStore(k.pricesRequestsStoreKey)
@@ -289,11 +289,6 @@ func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string, assetName str
 
 	var price types.CurrentPrice
 	k.cdc.MustUnmarshalBinaryBare(bz, &price)
-
-	// if the price is zero, then ask for the price of the token
-	if price.Price.IsZero() {
-		k.askForPrice(ctx, assetCode, assetName)
-	}
 
 	return price
 }

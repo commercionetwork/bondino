@@ -30,6 +30,7 @@ type PricefeedKeeper interface {
 	AddAsset(context sdk.Context, assetCode string, assetString string)
 	SetPrice(context sdk.Context, oracle sdk.AccAddress, assetCode string, assetName string, price sdk.Dec, expiry sdk.Int) (PostedPrice, sdk.Error)
 	SetCurrentPrices(sdk.Context) sdk.Error
+	AskForPrice(ctx sdk.Context, assetCode string, assetName string)
 }
 
 // PostedPrice struct represented a price for an asset posted by a specific oracle

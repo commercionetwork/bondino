@@ -24,7 +24,7 @@ func NewHandler(keeper Keeper) sdk.Handler {
 }
 
 func handleMsgSeizeAndStartCollateralAuction(ctx sdk.Context, keeper Keeper, msg MsgSeizeAndStartCollateralAuction) sdk.Result {
-	_, err := keeper.SeizeAndStartCollateralAuction(ctx, msg.CdpOwner, msg.CollateralDenom)
+	_, err := keeper.SeizeAndStartCollateralAuction(ctx, msg.CdpOwner, msg.Collateral)
 	if err != nil {
 		return err.Result()
 	}

@@ -2,6 +2,7 @@ package liquidator
 
 import (
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -34,25 +35,34 @@ func NewKeeper(cdc *codec.Codec, storeKey sdk.StoreKey, subspace params.Subspace
 // result: stable coin is transferred to module account, collateral is transferred from module account to buyer, (and any excess collateral is transferred to original CDP owner)
 func (k Keeper) SeizeAndStartCollateralAuction(ctx sdk.Context, owner sdk.AccAddress, collateral types.Collateral) (auction.ID, sdk.Error) {
 	// Get CDP
-	cdp, found := k.cdpKeeper.GetCDP(ctx, owner, collateral.Token.GetName())
+	var localCdp types.CDP
+	var found bool
+
+	switch collToken := collateral.Token.(type) {
+	case cdp.BaseFT:
+		localCdp, found = k.cdpKeeper.GetCDP(ctx, owner, collToken.GetName(), "")
+	case cdp.BaseNFT:
+		localCdp, found = k.cdpKeeper.GetCDP(ctx, owner, collToken.GetName(), collToken.ID)
+	}
+
 	if !found {
 		return 0, sdk.ErrInternal("CDP not found")
 	}
 
 	// Calculate amount of collateral to sell in this auction
-	params := k.GetParams(ctx).GetCollateralParams(cdp.Collateral.Token.GetName())
-	collateralToSell := sdk.MinInt(cdp.Collateral.Amount, params.AuctionSize)
+	params := k.GetParams(ctx).GetCollateralParams(localCdp.Collateral.Token.GetName())
+	collateralToSell := sdk.MinInt(localCdp.Collateral.Amount, params.AuctionSize)
 	// Calculate the corresponding maximum amount of stable coin to raise TODO test maths
-	stableToRaise := sdk.NewDecFromInt(collateralToSell).Quo(sdk.NewDecFromInt(cdp.Collateral.Amount)).Mul(sdk.NewDecFromInt(cdp.Liquidity.Coin.Amount)).RoundInt()
+	stableToRaise := sdk.NewDecFromInt(collateralToSell).Quo(sdk.NewDecFromInt(localCdp.Collateral.Amount)).Mul(sdk.NewDecFromInt(localCdp.Liquidity.Coin.Amount)).RoundInt()
 
 	// Seize the collateral and debt from the CDP
-	err := k.partialSeizeCDP(ctx, owner, collateral.Token.GetName(), collateralToSell, stableToRaise)
+	err := k.partialSeizeCDP(ctx, owner, collateral, collateralToSell, stableToRaise)
 	if err != nil {
 		return 0, err
 	}
 
 	// Start "forward reverse" auction type
-	lot := sdk.NewCoin(cdp.Collateral.Token.GetName(), collateralToSell)
+	lot := sdk.NewCoin(localCdp.Collateral.Token.GetName(), collateralToSell)
 	maxBid := sdk.NewCoin(k.cdpKeeper.GetStableDenom(), stableToRaise)
 	auctionID, err := k.auctionKeeper.StartForwardReverseAuction(ctx, k.cdpKeeper.GetLiquidatorAccountAddress(), lot, maxBid, owner)
 	if err != nil {
@@ -122,9 +132,9 @@ func (k Keeper) StartDebtAuction(ctx sdk.Context) (auction.ID, sdk.Error) {
 // }
 
 // PartialSeizeCDP seizes some collateral and debt from an under-collateralized CDP.
-func (k Keeper) partialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string, collateralToSeize sdk.Int, debtToSeize sdk.Int) sdk.Error { // aka Cat.bite
+func (k Keeper) partialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collateral types.Collateral, collateralToSeize sdk.Int, debtToSeize sdk.Int) sdk.Error { // aka Cat.bite
 	// Seize debt and collateral in the cdp module. This also validates the inputs.
-	err := k.cdpKeeper.PartialSeizeCDP(ctx, owner, collateralDenom, collateralToSeize, debtToSeize)
+	err := k.cdpKeeper.PartialSeizeCDP(ctx, owner, collateral, collateralToSeize, debtToSeize)
 	if err != nil {
 		return err // cdp could be not found, or not under collateralized, or inputs invalid
 	}
@@ -135,7 +145,7 @@ func (k Keeper) partialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collatera
 	k.setSeizedDebt(ctx, seizedDebt)
 
 	// add cdp.collateral amount of coins to the moduleAccount (so they can be transferred to the auction later)
-	coins := sdk.NewCoins(sdk.NewCoin(collateralDenom, collateralToSeize))
+	coins := sdk.NewCoins(sdk.NewCoin(collateral.Token.GetName(), collateralToSeize))
 	_, err = k.bankKeeper.AddCoins(ctx, k.cdpKeeper.GetLiquidatorAccountAddress(), coins)
 	if err != nil {
 		panic(err) // TODO this shouldn't happen?

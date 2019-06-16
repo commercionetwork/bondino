@@ -111,8 +111,15 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 
 	assetCode, assetName := k.getAssetCodeAndName(cdp.Collateral.Token)
 
+	collateralCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, assetCode, assetName)
+
+	// if the price is zero, then ask for the price of the token
+	if collateralCurrentPrice.Price.IsZero() {
+		k.pricefeed.AskForPrice(ctx, assetCode, assetName)
+	}
+
 	isUnderCollateralized := cdp.IsUnderCollateralized(
-		k.pricefeed.GetCurrentPrice(ctx, assetCode, assetName).Price,
+		collateralCurrentPrice.Price,
 		p.GetCollateralParams(cdp.Collateral.Token.GetName()).LiquidationRatio,
 	)
 
@@ -167,6 +174,17 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 
 	//TODO Here calculate liquidityValue
 	// Set CDP
+	liquidityCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, "", liquidity.Coin.Denom)
+	if liquidityCurrentPrice.Price.IsZero() {
+		return sdk.ErrInvalidCoins("Liquidity price cant be equal to zero")
+	}
+
+	var liquidityAmount sdk.Dec
+
+	liquidityAmount.Div(collateralCurrentPrice.Price.Int, liquidityCurrentPrice.Price.Int)
+
+	cdp.Liquidity.Coin.Amount = liquidityAmount.RoundInt()
+
 	if cdp.Collateral.Amount.IsZero() && cdp.Liquidity.Coin.Amount.IsZero() { // TODO maybe abstract this logic into setCDP
 		k.deleteCDP(ctx, cdp)
 	} else {
