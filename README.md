@@ -24,6 +24,9 @@ If you are willing to help us, please open an issue for any bug you find, or cre
 
 ## 📜 Usage 📜
 ### Pool
+
+> Allows to deposit and withdraw a given token amount into/from the liquidity pool .
+
 Deposit a given amount 
 ```bash
 kavacli tx pool deposit [amount] --from <key_name>
@@ -51,13 +54,21 @@ kavacli query pool funds
 ``` 
 
 ### Auction
+> Allows to close a collateralized debt position (CDP). 
+
 🔨 **WIP** 🔨
 
 ### Collateralized Debt Position
+> Allows to open a collateralized debt position (CDP) and later edit it.
+
 🔨 **WIP** 🔨
 
 ### Liquidator
+> Allows to automatically liquidate a CDP when some criteria are met (change in the liquidity/collaterals value)
+
 🔨 **WIP** 🔨
 
 ### Price feed
+> Allows to fetch the prices of non-fungible and fungible tokens contacting external oracles
+
 🔨 **WIP** 🔨
