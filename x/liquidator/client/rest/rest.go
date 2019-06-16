@@ -11,11 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
 
-<<<<<<< Updated upstream
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
-=======
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
->>>>>>> Stashed changes
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application

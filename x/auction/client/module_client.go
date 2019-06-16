@@ -3,10 +3,6 @@ package client
 import (
 	auctioncmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
-<<<<<<< Updated upstream
-=======
-	auctioncmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client/cli"
->>>>>>> Stashed changes
 	"github.com/spf13/cobra"
 	amino "github.com/tendermint/go-amino"
 )

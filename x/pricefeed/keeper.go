@@ -1,7 +1,6 @@
 package pricefeed
 
 import (
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
 	"sort"
 	"strings"
 
@@ -47,7 +46,6 @@ const (
 
 // Keeper struct for pricefeed module
 type Keeper struct {
-	cdp                    cdp.Keeper
 	priceStoreKey          sdk.StoreKey
 	pricesRequestsStoreKey sdk.StoreKey
 	cdc                    *codec.Codec

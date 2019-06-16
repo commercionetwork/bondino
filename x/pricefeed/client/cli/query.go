@@ -6,10 +6,6 @@ import (
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-<<<<<<< Updated upstream
-=======
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
->>>>>>> Stashed changes
 	"github.com/spf13/cobra"
 )
 

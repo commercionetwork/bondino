@@ -45,7 +45,8 @@ func (mc ModuleClient) GetTxCmd() *cobra.Command {
 	}
 
 	cdpTxCmd.AddCommand(client.PostCommands(
-		cdpcmd.GetCmdModifyCdp(mc.cdc),
+		cdpcmd.GetCmdModifyFtCdp(mc.cdc),
+		cdpcmd.GetCmdModifyNftCdp(mc.cdc),
 	)...)
 
 	return cdpTxCmd

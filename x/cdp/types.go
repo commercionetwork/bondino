@@ -2,7 +2,7 @@ package cdp
 
 import (
 	"fmt"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/token"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +12,7 @@ import (
 type CDP struct {
 	//ID             []byte                                    // removing IDs for now to make things simpler
 	Owner            sdk.AccAddress `json:"owner"` // Account that authorizes changes to the CDP
-	CollateralToken  client.Token   `json:"collateral_token"`
+	CollateralToken  token.Token    `json:"collateral_token"`
 	CollateralDenom  string         `json:"collateral_denom"`  // Type of collateral stored in this CDP
 	CollateralAmount sdk.Int        `json:"collateral_amount"` // Amount of collateral stored in this CDP
 	Debt             sdk.Int        `json:"debt"`              // Amount of stable coin drawn from this CDP

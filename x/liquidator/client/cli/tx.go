@@ -8,11 +8,7 @@ import (
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/spf13/cobra"
 
-<<<<<<< Updated upstream
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
-=======
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
->>>>>>> Stashed changes
 )
 
 func GetCmd_SeizeAndStartCollateralAuction(cdc *codec.Codec) *cobra.Command {

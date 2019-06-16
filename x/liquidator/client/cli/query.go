@@ -8,11 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-<<<<<<< Updated upstream
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
-=======
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
->>>>>>> Stashed changes
 )
 
 // GetCmd_GetOutstandingDebt queries for the remaining available debt in the liquidator module after settlement with the module's stablecoin balance.

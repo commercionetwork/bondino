@@ -9,10 +9,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-<<<<<<< Updated upstream
-=======
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
->>>>>>> Stashed changes
 	"github.com/spf13/cobra"
 )
 

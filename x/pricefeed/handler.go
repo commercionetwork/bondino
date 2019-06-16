@@ -31,7 +31,7 @@ func HandleMsgPostPrice(ctx sdk.Context, k Keeper, msg MsgPostPrice) sdk.Result 
 		return err.Result()
 	}
 
-	_, err = k.SetPrice(ctx, msg.From, msg.AssetCode, msg.Price, msg.Expiry)
+	_, err = k.SetPrice(ctx, msg.From, msg.AssetName, msg.AssetCode, msg.Price, msg.Expiry)
 	if err != nil {
 		return err.Result()
 	}
@@ -48,7 +48,6 @@ func EndBlocker(ctx sdk.Context, k Keeper) sdk.Tags {
 	// which occur during a block
 	//TODO use an iterator and update the prices for all assets in the store
 	k.SetCurrentPrices(ctx)
-
 
 	return sdk.Tags{}
 }

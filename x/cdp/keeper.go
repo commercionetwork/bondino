@@ -3,7 +3,7 @@ package cdp
 import (
 	"bytes"
 	"fmt"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/token"
 	"sort"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -37,9 +37,26 @@ func NewKeeper(cdc *codec.Codec, storeKey sdk.StoreKey, subspace params.Subspace
 	}
 }
 
+func (k Keeper) getAssetCodeAndName(token token.Token) (string, string) {
+
+	assetName := token.GetName()
+
+	var assetCode string
+	switch token := token.(type) {
+	case BaseFT:
+		assetCode = ""
+		break
+	case NFT:
+		assetCode = token.GetID()
+		break
+	}
+
+	return assetCode, assetName
+}
+
 // ModifyCDP creates, changes, or deletes a CDP
 // TODO can/should this function be split up?
-func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralToken client.Token, changeInCollateral sdk.Int, changeInDebt sdk.Int) sdk.Error {
+func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralToken token.Token, changeInCollateral sdk.Int, changeInDebt sdk.Int) sdk.Error {
 
 	// Phase 1: Get state, make changes in memory and check if they're ok.
 
@@ -78,8 +95,11 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralToken
 	if cdp.Debt.IsNegative() {
 		return sdk.ErrInternal("can't pay back more debt than exists in CDP")
 	}
+
+	assetCode, assetName := k.getAssetCodeAndName(cdp.CollateralToken)
+
 	isUnderCollateralized := cdp.IsUnderCollateralized(
-		k.pricefeed.GetCurrentPrice(ctx, cdp.CollateralToken).Price,
+		k.pricefeed.GetCurrentPrice(ctx, assetCode, assetName).Price,
 		p.GetCollateralParams(cdp.CollateralDenom).LiquidationRatio,
 	)
 	if isUnderCollateralized {
@@ -158,10 +178,12 @@ func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collatera
 		return sdk.ErrInternal("could not find CDP")
 	}
 
+	assetCode, assetName := k.getAssetCodeAndName(cdp.CollateralToken)
+
 	// Check if CDP is undercollateralized
 	p := k.GetParams(ctx)
 	isUnderCollateralized := cdp.IsUnderCollateralized(
-		k.pricefeed.GetCurrentPrice(ctx, cdp.CollateralDenom).Price,
+		k.pricefeed.GetCurrentPrice(ctx, assetCode, assetName).Price,
 		p.GetCollateralParams(cdp.CollateralDenom).LiquidationRatio,
 	)
 	if !isUnderCollateralized {

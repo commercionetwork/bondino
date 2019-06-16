@@ -1,4 +1,4 @@
-package client
+package token
 
 // interface implemented by FT and NFT
 type Token interface {
