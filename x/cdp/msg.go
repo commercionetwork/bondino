@@ -1,6 +1,7 @@
 package cdp
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -8,12 +9,12 @@ import (
 // TODO Make this more user friendly - maybe split into four functions.
 type MsgCreateOrModifyCDP struct {
 	Sender     sdk.AccAddress
-	Collateral Collateral
-	Liquidity  Liquidity
+	Collateral types.Collateral
+	Liquidity  types.Liquidity
 }
 
 // NewMsgPlaceBid returns a new MsgPlaceBid.
-func NewMsgCreateOrModifyCDP(sender sdk.AccAddress, collateral Collateral, liquidity Liquidity) MsgCreateOrModifyCDP {
+func NewMsgCreateOrModifyCDP(sender sdk.AccAddress, collateral types.Collateral, liquidity types.Liquidity) MsgCreateOrModifyCDP {
 	return MsgCreateOrModifyCDP{
 		Sender:     sender,
 		Collateral: collateral,

@@ -2,6 +2,7 @@ package cdp
 
 import (
 	"fmt"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -43,8 +44,8 @@ func queryGetCdps(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	var cdps CDPs
-	var cdp CDP
+	var cdps types.CDPs
+	var cdp types.CDP
 	var found bool
 
 	if len(requestParams.Owner) != 0 {
@@ -55,9 +56,9 @@ func queryGetCdps(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte
 				cdp, found = keeper.GetCDP(ctx, requestParams.Owner, requestParams.CollateralName, "")
 			}
 			if !found {
-				cdp = CDP{Owner: requestParams.Owner, Collateral: Collateral{}, Liquidity: Liquidity{}}
+				cdp = types.CDP{Owner: requestParams.Owner, Collateral: types.Collateral{}, Liquidity: types.Liquidity{}}
 			}
-			cdps = CDPs{cdp}
+			cdps = types.CDPs{cdp}
 		} else {
 			// owner, but no collateral specified - get all CDPs for one address
 			return nil, sdk.ErrInternal("getting all CDPs belonging to one owner not implemented")

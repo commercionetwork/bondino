@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -33,7 +34,7 @@ func GetCmdModifyFtCdp(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// compose the collateral value
-			collateral := cdp.Collateral{
+			collateral := types.Collateral{
 				Token: cdp.BaseFT{
 					TokenName: args[1],
 				},
@@ -41,7 +42,7 @@ func GetCmdModifyFtCdp(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// compose the liquidity value
-			liquidity := cdp.Liquidity{
+			liquidity := types.Liquidity{
 				Coin: sdk.NewCoin(args[3], sdk.NewInt(0)),
 			}
 
@@ -76,7 +77,7 @@ func GetCmdModifyNftCdp(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// build the collateral
-			collateral := cdp.Collateral{
+			collateral := types.Collateral{
 				Token: cdp.BaseNFT{
 					Name: args[1],
 					ID:   args[2],
@@ -85,7 +86,7 @@ func GetCmdModifyNftCdp(cdc *codec.Codec) *cobra.Command {
 			}
 
 			// build the liquidity
-			liquidity := cdp.Liquidity{
+			liquidity := types.Liquidity{
 				Coin: sdk.NewCoin(args[4], sdk.NewInt(0)),
 			}
 

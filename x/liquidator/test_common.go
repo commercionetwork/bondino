@@ -72,7 +72,7 @@ func setupTestKeepers() (sdk.Context, keepers) {
 		paramsKeeper.Subspace(bank.DefaultParamspace),
 		bank.DefaultCodespace,
 	)
-	pricefeedKeeper := pricefeed.NewKeeper(keyPriceFeed, cdc, pricefeed.DefaultCodespace)
+	pricefeedKeeper := pricefeed.NewKeeper(keyPriceFeed, cdc, pricefeed.DefaultCodespace, nil)
 	cdpKeeper := cdp.NewKeeper(
 		cdc,
 		keyCDP,
@@ -87,7 +87,7 @@ func setupTestKeepers() (sdk.Context, keepers) {
 		paramsKeeper.Subspace("liquidatorSubspace"),
 		cdpKeeper,
 		auctionKeeper,
-		cdpKeeper,
+		bankKeeper,
 	) // Note: cdp keeper stands in for bank keeper
 
 	// Create context

@@ -1,4 +1,4 @@
-package token
+package types
 
 // interface implemented by FT and NFT
 type Token interface {

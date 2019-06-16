@@ -27,21 +27,6 @@ const (
 )
 
 // implement fmt.Stringer
-func (cp CurrentPrice) String() string {
-	return strings.TrimSpace(fmt.Sprintf(`AssetCode: %s
-Price: %s
-Expiry: %s`, cp.AssetCode, cp.Price, cp.Expiry))
-}
-
-// implement fmt.Stringer
-func (pp PostedPrice) String() string {
-	return strings.TrimSpace(fmt.Sprintf(`AssetCode: %s
-OracleAddress: %s
-Price: %s
-Expiry: %s`, pp.AssetCode, pp.OracleAddress, pp.Price, pp.Expiry))
-}
-
-// implement fmt.Stringer
 func (a Asset) String() string {
 	return strings.TrimSpace(fmt.Sprintf(`AssetCode: %s
 Description: %s`, a.AssetCode, a.Description))

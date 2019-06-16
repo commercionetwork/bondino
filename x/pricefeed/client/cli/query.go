@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 
 	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -24,7 +25,7 @@ func GetCmdCurrentPrice(queryRoute string, cdc *codec.Codec) *cobra.Command {
 				fmt.Printf("could not get current price for - %s \n", string(assetCode))
 				return nil
 			}
-			var out pricefeed.CurrentPrice
+			var out types.CurrentPrice
 			cdc.MustUnmarshalJSON(res, &out)
 			return cliCtx.PrintOutput(out)
 		},

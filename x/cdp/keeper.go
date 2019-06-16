@@ -3,7 +3,7 @@ package cdp
 import (
 	"bytes"
 	"fmt"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/token"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 	"sort"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -19,14 +19,14 @@ const GovDenom = "kava"
 // Keeper cdp Keeper
 type Keeper struct {
 	storeKey       sdk.StoreKey
-	pricefeed      pricefeedKeeper
+	pricefeed      types.PricefeedKeeper
 	bank           bankKeeper
 	paramsSubspace params.Subspace
 	cdc            *codec.Codec
 }
 
 // NewKeeper creates a new keeper
-func NewKeeper(cdc *codec.Codec, storeKey sdk.StoreKey, subspace params.Subspace, pricefeed pricefeedKeeper, bank bankKeeper) Keeper {
+func NewKeeper(cdc *codec.Codec, storeKey sdk.StoreKey, subspace params.Subspace, pricefeed types.PricefeedKeeper, bank bankKeeper) Keeper {
 	subspace = subspace.WithKeyTable(createParamsKeyTable())
 	return Keeper{
 		storeKey:       storeKey,
@@ -37,7 +37,7 @@ func NewKeeper(cdc *codec.Codec, storeKey sdk.StoreKey, subspace params.Subspace
 	}
 }
 
-func (k Keeper) getAssetCodeAndName(token token.Token) (string, string) {
+func (k Keeper) getAssetCodeAndName(token types.Token) (string, string) {
 
 	assetName := token.GetName()
 
@@ -56,7 +56,7 @@ func (k Keeper) getAssetCodeAndName(token token.Token) (string, string) {
 
 // ModifyCDP creates, changes, or deletes a CDP
 // TODO can/should this function be split up?
-func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Collateral, liquidity Liquidity) sdk.Error {
+func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral types.Collateral, liquidity types.Liquidity) sdk.Error {
 
 	// Phase 1: Get state, make changes in memory and check if they're ok.
 
@@ -88,7 +88,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 	// Change collateral and debt recorded in CDP
 
 	// Get CDP (or create if not exists)
-	var cdp CDP
+	var cdp types.CDP
 	var found bool
 
 	switch collToken := (collateral.Token).(type) {
@@ -99,7 +99,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 	}
 
 	if !found {
-		cdp = CDP{Owner: owner, Collateral: collateral, Liquidity: liquidity}
+		cdp = types.CDP{Owner: owner, Collateral: collateral, Liquidity: liquidity}
 	}
 	// Add/Subtract collateral and debt
 	if cdp.Collateral.Amount.IsNegative() {
@@ -134,7 +134,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 	// Add/Subtract from collateral debt limit
 	collateralState, found := k.GetCollateralState(ctx, cdp.Collateral.Token.GetName())
 	if !found {
-		collateralState = CollateralState{Denom: cdp.Collateral.Token.GetName(), TotalDebt: sdk.ZeroInt()} // Already checked that this denom is authorized, so ok to create new CollateralState
+		collateralState = types.CollateralState{Denom: cdp.Collateral.Token.GetName(), TotalDebt: sdk.ZeroInt()} // Already checked that this denom is authorized, so ok to create new CollateralState
 	}
 	collateralState.TotalDebt = collateralState.TotalDebt.Add(liquidity.Coin.Amount)
 	if collateralState.TotalDebt.IsNegative() {
@@ -187,10 +187,10 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 
 // PartialSeizeCDP removes collateral and debt from a CDP and decrements global debt counters. It does not move collateral to another account so is unsafe.
 // TODO should this be made safer by moving collateral to liquidatorModuleAccount ? If so how should debt be moved?
-func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Collateral, collateralToSeize sdk.Int, debtToSeize sdk.Int) sdk.Error {
+func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collateral types.Collateral, collateralToSeize sdk.Int, debtToSeize sdk.Int) sdk.Error {
 	// Get CDP
 
-	var cdp CDP
+	var cdp types.CDP
 	var found bool
 
 	switch collToken := (collateral.Token).(type) {
@@ -280,14 +280,14 @@ func (k Keeper) GetGovDenom() string {
 
 // ---------- Module Parameters ----------
 
-func (k Keeper) GetParams(ctx sdk.Context) CdpModuleParams {
-	var p CdpModuleParams
+func (k Keeper) GetParams(ctx sdk.Context) types.CdpModuleParams {
+	var p types.CdpModuleParams
 	k.paramsSubspace.Get(ctx, moduleParamsKey, &p)
 	return p
 }
 
 // This is only needed to be able to setup the store from the genesis file. The keeper should not change any of the params itself.
-func (k Keeper) setParams(ctx sdk.Context, cdpModuleParams CdpModuleParams) {
+func (k Keeper) setParams(ctx sdk.Context, cdpModuleParams types.CdpModuleParams) {
 	k.paramsSubspace.Set(ctx, moduleParamsKey, &cdpModuleParams)
 }
 
@@ -311,27 +311,27 @@ func (k Keeper) getCDPKey(owner sdk.AccAddress, collateralDenom string) []byte {
 		nil, // no separator
 	)
 }
-func (k Keeper) GetCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string, nftID string) (CDP, bool) {
+func (k Keeper) GetCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string, nftID string) (types.CDP, bool) {
 	// get store
 	store := ctx.KVStore(k.storeKey)
 	// get CDP
 	bz := store.Get(k.getCDPKey(owner, collateralDenom))
 	// unmarshal
 	if bz == nil {
-		return CDP{}, false
+		return types.CDP{}, false
 	}
-	var cdp CDP
+	var cdp types.CDP
 	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &cdp)
 	return cdp, true
 }
-func (k Keeper) setCDP(ctx sdk.Context, cdp CDP) {
+func (k Keeper) setCDP(ctx sdk.Context, cdp types.CDP) {
 	// get store
 	store := ctx.KVStore(k.storeKey)
 	// marshal and set
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(cdp)
 	store.Set(k.getCDPKey(cdp.Owner, cdp.Collateral.Token.GetName()), bz)
 }
-func (k Keeper) deleteCDP(ctx sdk.Context, cdp CDP) { // TODO should this id the cdp by passing in owner,collateralDenom pair?
+func (k Keeper) deleteCDP(ctx sdk.Context, cdp types.CDP) { // TODO should this id the cdp by passing in owner,collateralDenom pair?
 	// get store
 	store := ctx.KVStore(k.storeKey)
 	// delete key
@@ -340,7 +340,7 @@ func (k Keeper) deleteCDP(ctx sdk.Context, cdp CDP) { // TODO should this id the
 
 // GetCDPs returns all CDPs, optionally filtered by collateral type and liquidation price.
 // `price` filters for CDPs that will be below the liquidation ratio when the collateral is at that specified price.
-func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Dec) (CDPs, sdk.Error) {
+func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Dec) (types.CDPs, sdk.Error) {
 	// Validate inputs
 	params := k.GetParams(ctx)
 	if len(collateralDenom) != 0 && !params.IsCollateralPresent(collateralDenom) {
@@ -355,9 +355,9 @@ func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Dec) 
 	iter := sdk.KVStorePrefixIterator(store, k.getCDPKeyPrefix(collateralDenom)) // could be all CDPs is collateralDenom is ""
 
 	// Decode CDPs into slice
-	var cdps CDPs
+	var cdps types.CDPs
 	for ; iter.Valid(); iter.Next() {
-		var cdp CDP
+		var cdp types.CDP
 		k.cdc.MustUnmarshalBinaryLengthPrefixed(iter.Value(), &cdp)
 		cdps = append(cdps, cdp)
 	}
@@ -368,7 +368,7 @@ func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Dec) 
 	// Filter for CDPs that would be under-collateralized at the specified price
 	// If price is nil or -ve, skip the filtering as it would return all CDPs anyway
 	if !price.IsNil() && !price.IsNegative() {
-		var filteredCDPs CDPs
+		var filteredCDPs types.CDPs
 		for _, cdp := range cdps {
 			if cdp.IsUnderCollateralized(price, params.GetCollateralParams(collateralDenom).LiquidationRatio) {
 				filteredCDPs = append(filteredCDPs, cdp)
@@ -408,20 +408,20 @@ func (k Keeper) setGlobalDebt(ctx sdk.Context, globalDebt sdk.Int) {
 func (k Keeper) getCollateralStateKey(collateralDenom string) []byte {
 	return []byte(collateralDenom)
 }
-func (k Keeper) GetCollateralState(ctx sdk.Context, collateralDenom string) (CollateralState, bool) {
+func (k Keeper) GetCollateralState(ctx sdk.Context, collateralDenom string) (types.CollateralState, bool) {
 	// get store
 	store := ctx.KVStore(k.storeKey)
 	// get bytes
 	bz := store.Get(k.getCollateralStateKey(collateralDenom))
 	// unmarshal
 	if bz == nil {
-		return CollateralState{}, false
+		return types.CollateralState{}, false
 	}
-	var collateralState CollateralState
+	var collateralState types.CollateralState
 	k.cdc.MustUnmarshalBinaryLengthPrefixed(bz, &collateralState)
 	return collateralState, true
 }
-func (k Keeper) setCollateralState(ctx sdk.Context, collateralstate CollateralState) {
+func (k Keeper) setCollateralState(ctx sdk.Context, collateralstate types.CollateralState) {
 	// get store
 	store := ctx.KVStore(k.storeKey)
 	// marshal and set

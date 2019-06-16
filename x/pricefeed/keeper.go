@@ -1,6 +1,7 @@
 package pricefeed
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 	"sort"
 	"strings"
 
@@ -50,14 +51,16 @@ type Keeper struct {
 	pricesRequestsStoreKey sdk.StoreKey
 	cdc                    *codec.Codec
 	codespace              sdk.CodespaceType
+	cdpKeeper              types.CdpKeeper
 }
 
 // NewKeeper returns a new keeper for the pricefeed modle
-func NewKeeper(storeKey sdk.StoreKey, cdc *codec.Codec, codespace sdk.CodespaceType) Keeper {
+func NewKeeper(storeKey sdk.StoreKey, cdc *codec.Codec, codespace sdk.CodespaceType, cdpKeeper types.CdpKeeper) Keeper {
 	return Keeper{
 		priceStoreKey: storeKey,
 		cdc:           cdc,
 		codespace:     codespace,
+		cdpKeeper:     cdpKeeper,
 	}
 }
 
@@ -90,7 +93,7 @@ func (k Keeper) AddAsset(ctx sdk.Context, assetCode string, desc string) {
 }
 
 // SetPrice updates the posted price for a specific oracle
-func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName string, assetCode string, price sdk.Dec, expiry sdk.Int) (PostedPrice, sdk.Error) {
+func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName string, assetCode string, price sdk.Dec, expiry sdk.Int) (types.PostedPrice, sdk.Error) {
 	// If the expiry is less than or equal to the current blockheight, we consider the price valid
 	if expiry.GTE(sdk.NewInt(ctx.BlockHeight())) {
 		store := ctx.KVStore(k.priceStoreKey)
@@ -106,9 +109,9 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 		}
 		// set the price for that particular oracle
 		if found {
-			prices[index] = PostedPrice{AssetCode: assetCode, OracleAddress: oracle.String(), Price: price, Expiry: expiry}
+			prices[index] = types.PostedPrice{AssetCode: assetCode, OracleAddress: oracle.String(), Price: price, Expiry: expiry}
 		} else {
-			prices = append(prices, PostedPrice{
+			prices = append(prices, types.PostedPrice{
 				AssetName:     assetName,
 				AssetCode:     assetCode,
 				OracleAddress: oracle.String(),
@@ -123,7 +126,7 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 		return prices[index], nil
 	}
 
-	return PostedPrice{}, ErrExpired(k.codespace)
+	return types.PostedPrice{}, ErrExpired(k.codespace)
 
 }
 
@@ -134,11 +137,11 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 		assetCode := v.AssetCode
 		assetName := v.AssetName
 		prices := k.GetRawPrices(ctx, assetCode, assetName)
-		var notExpiredPrices []CurrentPrice
+		var notExpiredPrices []types.CurrentPrice
 		// filter out expired prices
 		for _, v := range prices {
 			if v.Expiry.GTE(sdk.NewInt(ctx.BlockHeight())) {
-				notExpiredPrices = append(notExpiredPrices, CurrentPrice{
+				notExpiredPrices = append(notExpiredPrices, types.CurrentPrice{
 					AssetCode: v.AssetCode,
 					AssetName: v.AssetName,
 					Price:     v.Price,
@@ -184,7 +187,7 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 		}
 
 		store := ctx.KVStore(k.priceStoreKey)
-		currentPrice := CurrentPrice{
+		currentPrice := types.CurrentPrice{
 			AssetCode: assetCode,
 			Price:     medianPrice,
 			Expiry:    expiry,
@@ -277,14 +280,14 @@ func (k Keeper) askForPrice(ctx sdk.Context, assetCode string, assetName string)
 }
 
 // GetCurrentPrice fetches the current median price of all oracles for a specific asset
-func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string, assetName string) CurrentPrice {
+func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string, assetName string) types.CurrentPrice {
 
 	store := ctx.KVStore(k.priceStoreKey)
 	var storedPriceKey string
 
 	bz := store.Get([]byte(storedPriceKey))
 
-	var price CurrentPrice
+	var price types.CurrentPrice
 	k.cdc.MustUnmarshalBinaryBare(bz, &price)
 
 	// if the price is zero, then ask for the price of the token
@@ -296,10 +299,10 @@ func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string, assetName str
 }
 
 // GetRawPrices fetches the set of all prices posted by oracles for an asset
-func (k Keeper) GetRawPrices(ctx sdk.Context, assetCode string, assetName string) []PostedPrice {
+func (k Keeper) GetRawPrices(ctx sdk.Context, assetCode string, assetName string) []types.PostedPrice {
 	store := ctx.KVStore(k.priceStoreKey)
 	bz := store.Get([]byte(RawPriceFeedPrefix + assetCode))
-	var prices []PostedPrice
+	var prices []types.PostedPrice
 	k.cdc.MustUnmarshalBinaryBare(bz, &prices)
 	return prices
 }

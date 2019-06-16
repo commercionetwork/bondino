@@ -200,7 +200,7 @@ func NewKavaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 	app.crisisKeeper = crisis.NewKeeper(crisisSubspace, invCheckPeriod, app.distrKeeper,
 		app.bankKeeper, app.feeCollectionKeeper)
 
-	app.pricefeedKeeper = pricefeed.NewKeeper(app.keyPricefeed, app.cdc, pricefeed.DefaultCodespace)
+	app.pricefeedKeeper = pricefeed.NewKeeper(app.keyPricefeed, app.cdc, pricefeed.DefaultCodespace, app.cdpKeeper)
 	app.cdpKeeper = cdp.NewKeeper(
 		app.cdc,
 		app.keyCdp,

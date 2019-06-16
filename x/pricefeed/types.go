@@ -17,27 +17,10 @@ type Oracle struct {
 	OracleAddress string `json:"oracle_address"`
 }
 
-// CurrentPrice struct that contains the metadata of a current price for a particular asset in the pricefeed module.
-type CurrentPrice struct {
-	AssetName string  `json:"asset_name"`
-	AssetCode string  `json:"asset_code"`
-	Price     sdk.Dec `json:"price"`
-	Expiry    sdk.Int `json:"expiry"`
-}
-
-// PostedPrice struct represented a price for an asset posted by a specific oracle
-type PostedPrice struct {
-	AssetName     string  `json:"asset_name"`
-	AssetCode     string  `json:"asset_code"`
-	OracleAddress string  `json:"oracle_address"`
-	Price         sdk.Dec `json:"price"`
-	Expiry        sdk.Int `json:"expiry"`
-}
-
 // PendingPriceAsset struct that contains the info about the asset which price is still to be determined
 type PendingPriceAsset struct {
-	AssetName     string `json:"asset_name"`
-	AssetCode     string `json:"asset_code"`
+	AssetName string `json:"asset_name"`
+	AssetCode string `json:"asset_code"`
 }
 
 // SortDecs provides the interface needed to sort sdk.Dec slices
