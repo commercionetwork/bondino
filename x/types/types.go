@@ -9,7 +9,7 @@ import (
 type Collateral struct {
 	Token        Token   `json:"token"`
 	Amount       sdk.Int `json:"qty"`
-	InitialPrice sdk.Dec `json:"initial_price"`
+	InitialPrice sdk.Int `json:"initial_price"`
 }
 
 func (c Collateral) String() string {
@@ -24,15 +24,13 @@ func (c Collateral) String() string {
 }
 
 //evaluate the collateral amount
-func (c Collateral) CollateralValue() sdk.Dec {
-	decQty := sdk.NewDec(c.Amount.Int64())
-
-	return decQty.Mul(c.InitialPrice)
+func (c Collateral) CollateralValue() sdk.Int {
+	return c.Amount.Mul(c.InitialPrice)
 }
 
 type Liquidity struct {
 	Coin         sdk.Coin `json:"coin"`
-	InitialPrice sdk.Dec  `json:"initial_price"`
+	InitialPrice sdk.Int  `json:"initial_price"`
 }
 
 func (l Liquidity) String() string {
