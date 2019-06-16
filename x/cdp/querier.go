@@ -27,9 +27,10 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 }
 
 type QueryCdpsParams struct {
-	CollateralDenom       string         // get CDPs with this collateral denom
-	Owner                 sdk.AccAddress // get CDPs belonging to this owner
-	UnderCollateralizedAt sdk.Dec        // get CDPs that will be below the liquidation ratio when the collateral is at this price.
+	CollateralName        string         // get CDPs collateral name
+	NftID                 string         //  get CDPs collateral ID
+	Owner                 sdk.AccAddress //   get CDPs belonging to this owner
+	UnderCollateralizedAt sdk.Dec        //    get CDPs that will be below the liquidation ratio when the collateral is at this price.
 }
 
 // queryGetCdps fetches CDPs, optionally filtering by any of the query params (in QueryCdpsParams).
@@ -42,14 +43,19 @@ func queryGetCdps(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	// Get CDPs
 	var cdps CDPs
+	var cdp CDP
+	var found bool
+
 	if len(requestParams.Owner) != 0 {
-		if len(requestParams.CollateralDenom) != 0 {
-			// owner and collateral specified - get a single CDP
-			cdp, found := keeper.GetCDP(ctx, requestParams.Owner, requestParams.CollateralDenom)
+		if len(requestParams.CollateralName) != 0 {
+			if len(requestParams.NftID) != 0 { //ID specified, NFT
+				cdp, found = keeper.GetCDP(ctx, requestParams.Owner, requestParams.CollateralName, requestParams.NftID)
+			} else { // empty ID field, FT
+				cdp, found = keeper.GetCDP(ctx, requestParams.Owner, requestParams.CollateralName, "")
+			}
 			if !found {
-				cdp = CDP{Owner: requestParams.Owner, CollateralDenom: requestParams.CollateralDenom, CollateralAmount: sdk.ZeroInt(), Debt: sdk.ZeroInt()}
+				cdp = CDP{Owner: requestParams.Owner, Collateral: Collateral{}, Liquidity: Liquidity{}}
 			}
 			cdps = CDPs{cdp}
 		} else {
@@ -59,7 +65,7 @@ func queryGetCdps(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte
 	} else {
 		// owner not specified -- get all CDPs or all CDPs of one collateral type, optionally filtered by price
 		var errSdk sdk.Error // := doesn't work here
-		cdps, errSdk = keeper.GetCDPs(ctx, requestParams.CollateralDenom, requestParams.UnderCollateralizedAt)
+		cdps, errSdk = keeper.GetCDPs(ctx, requestParams.CollateralName, requestParams.UnderCollateralizedAt)
 		if errSdk != nil {
 			return nil, errSdk
 		}

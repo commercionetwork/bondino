@@ -88,7 +88,16 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 	// Change collateral and debt recorded in CDP
 
 	// Get CDP (or create if not exists)
-	cdp, found := k.GetCDP(ctx, owner, collateralName)
+	var cdp CDP
+	var found bool
+
+	switch collToken := (collateral.Token).(type) {
+	case BaseFT:
+		cdp, found = k.GetCDP(ctx, owner, collateralName, "")
+	case BaseNFT:
+		cdp, found = k.GetCDP(ctx, owner, collateralName, collToken.ID)
+	}
+
 	if !found {
 		cdp = CDP{Owner: owner, Collateral: collateral, Liquidity: liquidity}
 	}
@@ -155,6 +164,8 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 	if err != nil {
 		panic(err) // this shouldn't happen because coin balance was checked earlier
 	}
+
+	//TODO Here calculate liquidityValue
 	// Set CDP
 	if cdp.Collateral.Amount.IsZero() && cdp.Liquidity.Coin.Amount.IsZero() { // TODO maybe abstract this logic into setCDP
 		k.deleteCDP(ctx, cdp)
@@ -176,9 +187,18 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 
 // PartialSeizeCDP removes collateral and debt from a CDP and decrements global debt counters. It does not move collateral to another account so is unsafe.
 // TODO should this be made safer by moving collateral to liquidatorModuleAccount ? If so how should debt be moved?
-func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string, collateralToSeize sdk.Int, debtToSeize sdk.Int) sdk.Error {
-	// get CDP
-	cdp, found := k.GetCDP(ctx, owner, collateralDenom)
+func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Collateral, collateralToSeize sdk.Int, debtToSeize sdk.Int) sdk.Error {
+	// Get CDP
+
+	var cdp CDP
+	var found bool
+
+	switch collToken := (collateral.Token).(type) {
+	case BaseFT:
+		cdp, found = k.GetCDP(ctx, owner, collateral.Token.GetName(), "")
+	case BaseNFT:
+		cdp, found = k.GetCDP(ctx, owner, collateral.Token.GetName(), collToken.ID)
+	}
 	if !found {
 		return sdk.ErrInternal("could not find CDP")
 	}
@@ -291,7 +311,7 @@ func (k Keeper) getCDPKey(owner sdk.AccAddress, collateralDenom string) []byte {
 		nil, // no separator
 	)
 }
-func (k Keeper) GetCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string) (CDP, bool) {
+func (k Keeper) GetCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string, nftID string) (CDP, bool) {
 	// get store
 	store := ctx.KVStore(k.storeKey)
 	// get CDP

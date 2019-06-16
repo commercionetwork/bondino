@@ -31,7 +31,7 @@ func NewKeeper(cdc *codec.Codec, storeKey sdk.StoreKey, subspace params.Subspace
 // SeizeAndStartCollateralAuction pulls collateral out of a CDP and sells it in an auction for stable coin. Excess collateral goes to the original CDP owner.
 // Known as Cat.bite in maker
 // result: stable coin is transferred to module account, collateral is transferred from module account to buyer, (and any excess collateral is transferred to original CDP owner)
-func (k Keeper) SeizeAndStartCollateralAuction(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string) (auction.ID, sdk.Error) {
+func (k Keeper) SeizeAndStartCollateralAuction(ctx sdk.Context, owner sdk.AccAddress, collateral Collateral) (auction.ID, sdk.Error) {
 	// Get CDP
 	cdp, found := k.cdpKeeper.GetCDP(ctx, owner, collateralDenom)
 	if !found {
