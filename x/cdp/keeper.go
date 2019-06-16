@@ -195,6 +195,23 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	return nil
 }
 
+func (k Keeper) ModifyCDPType(ctx sdk.Context,
+	AssetName string,
+	AssetCode string,
+) sdk.Error {
+
+	// Get all cdps with AssetName
+	cdps, _ := k.GetCDPs(ctx, AssetName, sdk.NewDec(0))
+	for _, cdp := range cdps {
+		if cdp.CollateralToken.GetID == AssetCode {
+			k.ModifyCDP(ctx, cdp.Owner, cdp.CollateralToken, cdp.CollateralAmount, cdp.Debt)
+			break
+		}
+	}
+	return nil
+}
+
+
 // TODO
 // // TransferCDP allows people to transfer ownership of their CDPs to others
 // func (k Keeper) TransferCDP(ctx sdk.Context, from sdk.AccAddress, to sdk.AccAddress, collateralDenom string) sdk.Error {
