@@ -16,7 +16,7 @@ import (
 // GetCmdModifyFtCdp cli command for creating and modifying FT cdps.
 func GetCmdModifyFtCdp(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "modify-cdp-ft [ownerAddress] [collateralType] [collateralChange] [debtChange]",
+		Use:   "modify-cdp-ft [ownerAddress] [collateralName] [collateralQuantity] [liquidityName]",
 		Short: "create or modify a cdp",
 		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -25,22 +25,27 @@ func GetCmdModifyFtCdp(cdc *codec.Codec) *cobra.Command {
 			if err := cliCtx.EnsureAccountExists(); err != nil {
 				return err
 			}
-			collateralChange, ok := sdk.NewIntFromString(args[2])
+
+			collateralQuantity, ok := sdk.NewIntFromString(args[2])
 			if !ok {
 				fmt.Printf("invalid collateral amount - %s \n", string(args[2]))
 				return nil
 			}
-			debtChange, ok := sdk.NewIntFromString(args[3])
-			if !ok {
-				fmt.Printf("invalid debt amount - %s \n", string(args[3]))
-				return nil
+
+			// compose the collateral value
+			collateral := cdp.Collateral{
+				Token: cdp.BaseFT{
+					TokenName: args[1],
+				},
+				Amount: collateralQuantity,
 			}
 
-			token := cdp.BaseFT{
-				TokenName: args[1],
+			// compose the liquidity value
+			liquidity := cdp.Liquidity{
+				Coin: sdk.NewCoin(args[3], sdk.NewInt(0)),
 			}
 
-			msg := cdp.NewMsgCreateOrModifyCDP(cliCtx.GetFromAddress(), token, collateralChange, debtChange)
+			msg := cdp.NewMsgCreateOrModifyCDP(cliCtx.GetFromAddress(), collateral, liquidity)
 			err := msg.ValidateBasic()
 			if err != nil {
 				return err
@@ -54,7 +59,7 @@ func GetCmdModifyFtCdp(cdc *codec.Codec) *cobra.Command {
 // GetCmdModifyNftCdp cli command for creating and modifying NFT cdps.
 func GetCmdModifyNftCdp(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "modify-cdp-nft [ownerAddress] [collateralName] [collateralId] [collateralChange] [debtChange]",
+		Use:   "modify-cdp-nft [ownerAddress] [collateralName] [collateralId] [collateralQuantity] [liquidityName]",
 		Short: "create or modify a cdp",
 		Args:  cobra.ExactArgs(5),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -63,23 +68,29 @@ func GetCmdModifyNftCdp(cdc *codec.Codec) *cobra.Command {
 			if err := cliCtx.EnsureAccountExists(); err != nil {
 				return err
 			}
-			collateralChange, ok := sdk.NewIntFromString(args[2])
+
+			collateralAmount, ok := sdk.NewIntFromString(args[3])
 			if !ok {
-				fmt.Printf("invalid collateral amount - %s \n", string(args[2]))
-				return nil
-			}
-			debtChange, ok := sdk.NewIntFromString(args[3])
-			if !ok {
-				fmt.Printf("invalid debt amount - %s \n", string(args[3]))
+				fmt.Printf("invalid collateral amount - %s \n", string(args[3]))
 				return nil
 			}
 
-			token := cdp.BaseNFT{
-				Name: args[1],
-				ID:   args[2],
+			// build the collateral
+			collateral := cdp.Collateral{
+				Token: cdp.BaseNFT{
+					Name: args[1],
+					ID:   args[2],
+				},
+				Amount: collateralAmount,
 			}
 
-			msg := cdp.NewMsgCreateOrModifyCDP(cliCtx.GetFromAddress(), token, collateralChange, debtChange)
+			// build the liquidity
+			liquidity := cdp.Liquidity{
+				Coin: sdk.NewCoin(args[4], sdk.NewInt(0)),
+			}
+
+			// create the message
+			msg := cdp.NewMsgCreateOrModifyCDP(cliCtx.GetFromAddress(), collateral, liquidity)
 			err := msg.ValidateBasic()
 			if err != nil {
 				return err
