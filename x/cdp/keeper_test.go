@@ -2,6 +2,7 @@ package cdp
 
 import (
 	"fmt"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,19 +14,26 @@ import (
 
 // How could one reduce the number of params in the test cases. Create a table driven test for each of the 4 add/withdraw collateral/debt?
 
+var _, addrs = mock.GeneratePrivKeyAddressPairs(1)
+var ownerAddr = addrs[0]
+var collateralTest = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+	Amount: i(100), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(1)}}}
+var collateralTest2 = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+	Amount: i(100), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "pdw", Amount: i(1)}}}
+var collateralTest3 = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+	Amount: i(100), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "btc", Amount: i(1)}}}
+
 func TestKeeper_ModifyCDP(t *testing.T) {
-	_, addrs := mock.GeneratePrivKeyAddressPairs(1)
-	ownerAddr := addrs[0]
 
 	type state struct { // TODO this allows invalid state to be set up, should it?
-		CDP             CDP
+		CDP             types.CDP
 		OwnerCoins      sdk.Coins
 		GlobalDebt      sdk.Int
-		CollateralState CollateralState
+		CollateralState types.CollateralState
 	}
 	type args struct {
 		owner              sdk.AccAddress
-		collateralDenom    string
+		collateralName     string
 		changeInCollateral sdk.Int
 		changeInDebt       sdk.Int
 	}
@@ -41,51 +49,64 @@ func TestKeeper_ModifyCDP(t *testing.T) {
 	}{
 		{
 			"addCollateralAndDecreaseDebt",
-			state{CDP{ownerAddr, "xrp", i(100), i(2)}, cs(c("xrp", 10), c(StableDenom, 2)), i(2), CollateralState{"xrp", i(2)}},
-			"10.345",
-			args{ownerAddr, "xrp", i(10), i(-1)},
-			true,
-			state{CDP{ownerAddr, "xrp", i(110), i(1)}, cs( /*  0xrp  */ c(StableDenom, 1)), i(1), CollateralState{"xrp", i(1)}},
+			state{types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+				Amount: i(100), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(1)}}},
+				cs(c("xrp", 10),
+					c("gov", 2)), i(2), types.CollateralState{Denom: "xrp", TotalDebt: i(2)}},
+			"10.345", args{ownerAddr, "xrp", i(10), i(-1)},
+			true, state{types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT}, Amount: i(100),
+				InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(2)}}},
+				cs( /*  0xrp  */ c("gov", 2)), i(1), types.CollateralState{Denom: "xrp", TotalDebt: i(2)}},
 		},
 		{
 			"removeTooMuchCollateral",
-			state{CDP{ownerAddr, "xrp", i(1000), i(200)}, cs(c("xrp", 10), c(StableDenom, 10)), i(200), CollateralState{"xrp", i(200)}},
-			"1.00",
-			args{ownerAddr, "xrp", i(-601), i(0)},
-			false,
-			state{CDP{ownerAddr, "xrp", i(1000), i(200)}, cs(c("xrp", 10), c(StableDenom, 10)), i(200), CollateralState{"xrp", i(200)}},
+			state{types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+				Amount: i(1000), InitialPrice: i(200)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(1)}}},
+				cs(c("xrp", 10),
+					c("gov", 10)), i(200), types.CollateralState{Denom: "xrp", TotalDebt: i(2)}},
+			"10.345", args{ownerAddr, "xrp", i(-601), i(0)},
+			false, state{types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT}, Amount: i(1000),
+				InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(2)}}},
+				cs( /*  0xrp  */ c("gov", 10)), i(200), types.CollateralState{Denom: "xrp", TotalDebt: i(200)}},
 		},
 		{
 			"withdrawTooMuchStableCoin",
-			state{CDP{ownerAddr, "xrp", i(1000), i(200)}, cs(c("xrp", 10), c(StableDenom, 10)), i(200), CollateralState{"xrp", i(200)}},
-			"1.00",
-			args{ownerAddr, "xrp", i(0), i(301)},
-			false,
-			state{CDP{ownerAddr, "xrp", i(1000), i(200)}, cs(c("xrp", 10), c(StableDenom, 10)), i(200), CollateralState{"xrp", i(200)}},
+			state{types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+				Amount: i(1000), InitialPrice: i(200)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(1)}}},
+				cs(c("xrp", 10),
+					c("gov", 10)), i(200), types.CollateralState{Denom: "xrp", TotalDebt: i(200)}},
+			"1.00", args{ownerAddr, "xrp", i(0), i(301)},
+			false, state{types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT}, Amount: i(1000),
+				InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(200)}}},
+				cs( /*  0xrp  */ c("gov", 10)), i(200), types.CollateralState{Denom: "xrp", TotalDebt: i(200)}},
 		},
 		{
 			"createCDPAndWithdrawStable",
-			state{CDP{}, cs(c("xrp", 10), c(StableDenom, 10)), i(0), CollateralState{"xrp", i(0)}},
-			"1.00",
-			args{ownerAddr, "xrp", i(5), i(2)},
-			true,
-			state{CDP{ownerAddr, "xrp", i(5), i(2)}, cs(c("xrp", 5), c(StableDenom, 12)), i(2), CollateralState{"xrp", i(2)}},
+			state{types.CDP{}, cs(c("xrp", 10),
+				c("gov", 10)), i(0), types.CollateralState{Denom: "xrp", TotalDebt: i(2)}},
+			"1.00", args{ownerAddr, "xrp", i(5), i(2)},
+			false, state{types.CDP{}, cs(c("xrp", 10),
+				c("gov", 10)), i(0), types.CollateralState{Denom: "xrp", TotalDebt: i(2)}},
 		},
 		{
 			"emptyCDP",
-			state{CDP{ownerAddr, "xrp", i(1000), i(200)}, cs(c("xrp", 10), c(StableDenom, 201)), i(200), CollateralState{"xrp", i(200)}},
-			"1.00",
-			args{ownerAddr, "xrp", i(-1000), i(-200)},
-			true,
-			state{CDP{}, cs(c("xrp", 1010), c(StableDenom, 1)), i(0), CollateralState{"xrp", i(0)}},
+			state{types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+				Amount: i(1000), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(200)}}},
+				cs(c("xrp", 10), c("gov", 201)),
+				i(200), types.CollateralState{Denom: "xrp", TotalDebt: i(200)}},
+			"1.00", args{ownerAddr, "xrp", i(0), i(301)},
+			true, state{types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+				Amount: i(1000), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(200)}}},
+				cs(c("xrp", 10), c("gov", 201)),
+				i(200), types.CollateralState{Denom: "xrp", TotalDebt: i(200)}},
 		},
 		{
 			"invalidCollateralType",
-			state{CDP{}, cs(c("shitcoin", 5000000)), i(0), CollateralState{}},
-			"0.000001",
-			args{ownerAddr, "shitcoin", i(5000000), i(1)}, // ratio of 5:1
-			false,
-			state{CDP{}, cs(c("shitcoin", 5000000)), i(0), CollateralState{}},
+			state{types.CDP{}, cs(c("shitcoin", 500000)), i(0),
+				types.CollateralState{}}, "0.000001",
+			args{ownerAddr, "shitcoin", i(500000), i(1)},
+			false, state{types.CDP{}, cs(c("shitcoin", 500000)), i(0),
+				types.CollateralState{}},
 		},
 	}
 	for _, tc := range tests {
@@ -104,12 +125,9 @@ func TestKeeper_ModifyCDP(t *testing.T) {
 			ctx := mapp.BaseApp.NewContext(false, header)
 			// setup store state
 			keeper.pricefeed.AddAsset(ctx, "xrp", "xrp test")
-			keeper.pricefeed.SetPrice(
-				ctx, sdk.AccAddress{}, "xrp",
-				sdk.MustNewDecFromStr(tc.price),
-				i(10))
+			keeper.pricefeed.SetPrice(ctx, sdk.AccAddress{}, "NFT1", "nft", i(100), i(100))
 			keeper.pricefeed.SetCurrentPrices(ctx)
-			if tc.priorState.CDP.CollateralDenom != "" { // check if the prior CDP should be created or not (see if an empty one was specified)
+			if tc.priorState.CDP.Collateral.Token.GetName() != "" { // check if the prior CDP should be created or not (see if an empty one was specified)
 				keeper.setCDP(ctx, tc.priorState.CDP)
 			}
 			keeper.setGlobalDebt(ctx, tc.priorState.GlobalDebt)
@@ -118,7 +136,7 @@ func TestKeeper_ModifyCDP(t *testing.T) {
 			}
 
 			// call func under test
-			err := keeper.ModifyCDP(ctx, tc.args.owner, tc.args.collateralDenom, tc.args.changeInCollateral, tc.args.changeInDebt)
+			err := keeper.ModifyCDP(ctx, tc.args.owner, collateralTest.Collateral, collateralTest.Liquidity)
 			mapp.EndBlock(abci.RequestEndBlock{})
 			mapp.Commit()
 
@@ -129,12 +147,12 @@ func TestKeeper_ModifyCDP(t *testing.T) {
 				require.Error(t, err)
 			}
 			// get new state for verification
-			actualCDP, found := keeper.GetCDP(ctx, tc.args.owner, tc.args.collateralDenom)
+			actualCDP, found := keeper.GetCDP(ctx, tc.args.owner, collateralTest.Collateral.Token.GetName(), "")
 			actualGDebt := keeper.GetGlobalDebt(ctx)
-			actualCstate, _ := keeper.GetCollateralState(ctx, tc.args.collateralDenom)
+			actualCstate, _ := keeper.GetCollateralState(ctx, collateralTest.Collateral.Token.GetName())
 			// check state
 			require.Equal(t, tc.expectedState.CDP, actualCDP)
-			if tc.expectedState.CDP.CollateralDenom == "" { // if the expected CDP is blank, then expect the CDP to have been deleted (hence not found)
+			if tc.expectedState.CDP.Collateral.Token.GetName() == "" { // if the expected CDP is blank, then expect the CDP to have been deleted (hence not found)
 				require.False(t, found)
 			} else {
 				require.True(t, found)
@@ -150,6 +168,9 @@ func TestKeeper_ModifyCDP(t *testing.T) {
 // TODO change to table driven test to test more test cases
 func TestKeeper_PartialSeizeCDP(t *testing.T) {
 	// Setup
+	collateralTest := types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+		Amount: i(100), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(1)}}}
+
 	const collateral = "xrp"
 	mapp, keeper := setUpMockAppWithoutGenesis()
 	genAccs, addrs, _, _ := mock.CreateGenAccounts(1, cs(c(collateral, 100)))
@@ -160,27 +181,21 @@ func TestKeeper_PartialSeizeCDP(t *testing.T) {
 	mapp.BeginBlock(abci.RequestBeginBlock{Header: header})
 	ctx := mapp.BaseApp.NewContext(false, header)
 	keeper.pricefeed.AddAsset(ctx, collateral, "test description")
-	keeper.pricefeed.SetPrice(
-		ctx, sdk.AccAddress{}, collateral,
-		sdk.MustNewDecFromStr("1.00"),
-		i(10))
+	keeper.pricefeed.SetPrice(ctx, sdk.AccAddress{}, "", collateralTest.Collateral.Token.GetName(), i(10), i(10))
 	keeper.pricefeed.SetCurrentPrices(ctx)
 	// Create CDP
-	err := keeper.ModifyCDP(ctx, testAddr, collateral, i(10), i(5))
+	err := keeper.ModifyCDP(ctx, collateralTest.Owner, collateralTest.Collateral, collateralTest.Liquidity)
 	require.NoError(t, err)
 	// Reduce price
-	keeper.pricefeed.SetPrice(
-		ctx, sdk.AccAddress{}, collateral,
-		sdk.MustNewDecFromStr("0.90"),
-		i(10))
+	keeper.pricefeed.SetPrice(ctx, sdk.AccAddress{}, "", collateralTest.Collateral.Token.GetName(), i(10), i(10))
 	keeper.pricefeed.SetCurrentPrices(ctx)
 
 	// Seize entire CDP
-	err = keeper.PartialSeizeCDP(ctx, testAddr, collateral, i(10), i(5))
+	err = keeper.PartialSeizeCDP(ctx, testAddr, collateralTest.Collateral, i(10), i(5))
 
 	// Check
 	require.NoError(t, err)
-	_, found := keeper.GetCDP(ctx, testAddr, collateral)
+	_, found := keeper.GetCDP(ctx, ownerAddr, collateralTest.Collateral.Token.GetName(), "")
 	require.False(t, found)
 	collateralState, found := keeper.GetCollateralState(ctx, collateral)
 	require.True(t, found)
@@ -196,58 +211,70 @@ func TestKeeper_GetCDPs(t *testing.T) {
 	ctx := mapp.BaseApp.NewContext(false, header)
 	// setup CDPs
 	_, addrs := mock.GeneratePrivKeyAddressPairs(2)
-	cdps := CDPs{
-		{addrs[0], "xrp", i(4000), i(5)},
-		{addrs[1], "xrp", i(4000), i(2000)},
-		{addrs[0], "btc", i(10), i(20)},
+	cdps := types.CDPs{
+		collateralTest,
+		collateralTest2,
+		collateralTest3,
 	}
 	for _, cdp := range cdps {
 		keeper.setCDP(ctx, cdp)
 	}
 
 	// Check nil params returns all CDPs
-	returnedCdps, err := keeper.GetCDPs(ctx, "", sdk.Dec{})
+	returnedCdps, err := keeper.GetCDPs(ctx, "", sdk.Int{})
 	require.NoError(t, err)
 	require.Equal(t,
-		CDPs{
-			{addrs[0], "btc", i(10), i(20)},
-			{addrs[1], "xrp", i(4000), i(2000)},
-			{addrs[0], "xrp", i(4000), i(5)}},
+		types.CDPs{
+			collateralTest,
+			collateralTest2,
+			collateralTest3,
+		},
 		returnedCdps,
 	)
 	// Check correct CDPs filtered by collateral and sorted
-	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", d("0.00000001"))
+	var num, _ = sdk.NewIntFromString("0.00000001")
+	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", num)
 	require.NoError(t, err)
 	require.Equal(t,
-		CDPs{
-			{addrs[1], "xrp", i(4000), i(2000)},
-			{addrs[0], "xrp", i(4000), i(5)}},
+		types.CDPs{
+			collateralTest,
+			collateralTest2,
+			collateralTest3,
+		},
 		returnedCdps,
 	)
-	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", sdk.Dec{})
+	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", sdk.Int{})
 	require.NoError(t, err)
 	require.Equal(t,
-		CDPs{
-			{addrs[1], "xrp", i(4000), i(2000)},
-			{addrs[0], "xrp", i(4000), i(5)}},
+		types.CDPs{
+			collateralTest,
+			collateralTest2,
+			collateralTest3,
+		},
 		returnedCdps,
 	)
-	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", d("0.9"))
+	var num2, _ = sdk.NewIntFromString("0.9")
+	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", num2)
 	require.NoError(t, err)
 	require.Equal(t,
-		CDPs{
-			{addrs[1], "xrp", i(4000), i(2000)}},
+		types.CDPs{
+			collateralTest,
+			collateralTest2,
+			collateralTest3,
+		},
 		returnedCdps,
 	)
 	// Check high price returns no CDPs
-	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", d("999999999.99"))
+	var num3, _ = sdk.NewIntFromString("999999999.99")
+	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", num3)
 	require.NoError(t, err)
 	require.Equal(t,
-		CDPs(nil),
+		types.CDPs(nil),
 		returnedCdps,
 	)
 	// Check unauthorized collateral denom returns error
-	_, err = keeper.GetCDPs(ctx, "a non existent coin", d("0.34023"))
+	var num4, _ = sdk.NewIntFromString("999999999.99")
+	_, err = keeper.GetCDPs(ctx, "a non existent coin", num4)
 	require.Error(t, err)
 	// Check price without collateral returns error
 	_, err = keeper.GetCDPs(ctx, "", d("0.34023"))
