@@ -15,18 +15,13 @@ import (
 	genaccscli "github.com/cosmos/cosmos-sdk/x/auth/genaccounts/client/cli"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 
-
-	"github.com/kava-labs/kava-devnet/blockchain/app"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/app"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/cli"
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
-)
-
-const (
-	flagOverwrite = "overwrite"
 )
 
 var invCheckPeriod uint
@@ -63,7 +58,6 @@ func main() {
 	}
 }
 
-
 func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application {
 	return app.NewKavaApp(
 		logger, db, traceStore, true, invCheckPeriod,
@@ -72,7 +66,6 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application
 		baseapp.SetHaltHeight(uint64(viper.GetInt(server.FlagHaltHeight))),
 	)
 }
-
 
 func exportAppStateAndTMValidators(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool, jailWhiteList []string,

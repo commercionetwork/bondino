@@ -3,9 +3,9 @@ package cli
 import (
 	"fmt"
 
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
 	"github.com/spf13/cobra"
 )
 

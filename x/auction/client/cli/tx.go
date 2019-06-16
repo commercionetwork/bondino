@@ -3,12 +3,12 @@ package cli
 import (
 	"fmt"
 
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-	"github.com/kava-labs/kava-devnet/blockchain/x/auction"
 	"github.com/spf13/cobra"
 )
 

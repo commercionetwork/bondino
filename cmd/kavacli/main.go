@@ -5,8 +5,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/kava-labs/kava-devnet/blockchain/app"
-
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/app"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/keys"
@@ -19,7 +18,6 @@ import (
 	"github.com/rakyll/statik/fs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
 
 	amino "github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/libs/cli"
@@ -49,15 +47,15 @@ import (
 	stakingclient "github.com/cosmos/cosmos-sdk/x/staking/client"
 	staking "github.com/cosmos/cosmos-sdk/x/staking/client/rest"
 
-	auctionclient "github.com/kava-labs/kava-devnet/blockchain/x/auction/client"
-	auctionrest "github.com/kava-labs/kava-devnet/blockchain/x/auction/client/rest"
-	cdpclient "github.com/kava-labs/kava-devnet/blockchain/x/cdp/client"
-	cdprest "github.com/kava-labs/kava-devnet/blockchain/x/cdp/client/rest"
-	liquidatorclient "github.com/kava-labs/kava-devnet/blockchain/x/liquidator/client"
-	liquidatorrest "github.com/kava-labs/kava-devnet/blockchain/x/liquidator/client/rest"
-	priceclient "github.com/kava-labs/kava-devnet/blockchain/x/pricefeed/client"
-	pricerest "github.com/kava-labs/kava-devnet/blockchain/x/pricefeed/client/rest"
-
+	auctionclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client"
+	auctionrest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client/rest"
+	cdpclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client"
+	cdprest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client/rest"
+	liquidatorclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client"
+	liquidatorrest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client/rest"
+	poolclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pool/client"
+	priceclient "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client"
+	pricerest "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client/rest"
 
 	_ "github.com/cosmos/gaia/cmd/gaiacli/statik"
 )
@@ -83,6 +81,7 @@ func main() {
 		cdpclient.NewModuleClient("cdp", cdc),
 		auctionclient.NewModuleClient("auction", cdc),
 		liquidatorclient.NewModuleClient("liquidator", cdc),
+		poolclient.NewModuleClient("pool", cdc),
 	}
 
 	rootCmd := &cobra.Command{
