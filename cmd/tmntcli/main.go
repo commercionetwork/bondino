@@ -83,8 +83,8 @@ func main() {
 	}
 
 	rootCmd := &cobra.Command{
-		Use:   "kavacli",
-		Short: "Kava command line interface",
+		Use:   "tmntcli",
+		Short: "TMNT command line interface",
 	}
 
 	// Add --chain-id to persistent flags and mark it required
@@ -108,7 +108,7 @@ func main() {
 		client.NewCompletionCmd(rootCmd, true),
 	)
 
-	executor := cli.PrepareMainCmd(rootCmd, "kava", app.DefaultCLIHome)
+	executor := cli.PrepareMainCmd(rootCmd, "tmnt", app.DefaultCLIHome)
 	err := executor.Execute()
 	if err != nil {
 		panic(err)

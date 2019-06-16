@@ -32,15 +32,15 @@ import (
 )
 
 const (
-	appName = "kava"
+	appName = "tmnt"
 )
 
 var (
-	// DefaultCLIHome default home directories for kavacli
-	DefaultCLIHome = os.ExpandEnv("$HOME/.kavacli")
+	// DefaultCLIHome default home directories for tmntcli
+	DefaultCLIHome = os.ExpandEnv("$HOME/.tmntcli")
 
-	// DefaultNodeHome default home directories for kavad
-	DefaultNodeHome = os.ExpandEnv("$HOME/.kavad")
+	// DefaultNodeHome default home directories for tmntd
+	DefaultNodeHome = os.ExpandEnv("$HOME/.tmntd")
 
 	// ModuleBasics The ModuleBasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
@@ -81,9 +81,9 @@ func MakeCodec() *codec.Codec {
 // SetAddressPrefixes sets the bech32 address prefixes globally for the sdk module.
 func SetAddressPrefixes() {
 	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount("kava", "kava"+"pub")
-	config.SetBech32PrefixForValidator("kava"+"val"+"oper", "kava"+"val"+"oper"+"pub")
-	config.SetBech32PrefixForConsensusNode("kava"+"val"+"cons", "kava"+"val"+"cons"+"pub")
+	config.SetBech32PrefixForAccount("tmnt", "tmnt"+"pub")
+	config.SetBech32PrefixForValidator("tmnt"+"val"+"oper", "tmnt"+"val"+"oper"+"pub")
+	config.SetBech32PrefixForConsensusNode("tmnt"+"val"+"cons", "tmnt"+"val"+"cons"+"pub")
 	config.Seal()
 }
 
@@ -136,7 +136,7 @@ type KavaApp struct {
 	mm *sdk.ModuleManager
 }
 
-// NewKavaApp is a constructor function for kavaApp
+// NewKavaApp is a constructor function for tmntApp
 func NewKavaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
 	invCheckPeriod uint, baseAppOptions ...func(*bam.BaseApp)) *KavaApp {
 

@@ -12,7 +12,7 @@ import (
 )
 
 // GovDenom asset code of the governance coin
-const GovDenom = "kava"
+const GovDenom = "tmnt"
 
 // Keeper cdp Keeper
 type Keeper struct {
@@ -396,8 +396,8 @@ func (k Keeper) deleteCDP(ctx sdk.Context, cdp types.CDP) { // TODO should this 
 // `price` filters for CDPs that will be below the liquidation ratio when the collateral is at that specified price.
 func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Int) (types.CDPs, sdk.Error) {
 	// Validate inputs
-	params := k.GetParams(ctx)
-	if len(collateralDenom) != 0 && !params.IsCollateralPresent(collateralDenom) {
+	parameters := k.GetParams(ctx)
+	if len(collateralDenom) != 0 && !parameters.IsCollateralPresent(collateralDenom) {
 		return nil, sdk.ErrInternal("collateral denom not authorized")
 	}
 	if len(collateralDenom) == 0 && !price.IsNegative() {
@@ -424,7 +424,7 @@ func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Int) 
 	if !price.IsNegative() {
 		var filteredCDPs types.CDPs
 		for _, cdp := range cdps {
-			if cdp.IsUnderCollateralized(price, params.GetCollateralParams(collateralDenom).LiquidationRatio) {
+			if cdp.IsUnderCollateralized(price, parameters.GetCollateralParams(collateralDenom).LiquidationRatio) {
 				filteredCDPs = append(filteredCDPs, cdp)
 			} else {
 				break // break early because list is sorted

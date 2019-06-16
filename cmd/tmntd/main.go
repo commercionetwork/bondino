@@ -35,8 +35,8 @@ func main() {
 	ctx := server.NewDefaultContext()
 	cobra.EnableCommandSorting = false
 	rootCmd := &cobra.Command{
-		Use:               "kavad",
-		Short:             "Kava Blockchain Daemon (server)",
+		Use:               "tmntd",
+		Short:             "TMNT Blockchain Daemon (server)",
 		PersistentPreRunE: server.PersistentPreRunEFn(ctx),
 	}
 

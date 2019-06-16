@@ -13,7 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 )
 
-// ExportAppStateAndValidators export the state of kava for a genesis file
+// ExportAppStateAndValidators export the state of tmnt for a genesis file
 func (app *KavaApp) ExportAppStateAndValidators(forZeroHeight bool, jailWhiteList []string,
 ) (appState json.RawMessage, validators []tmtypes.GenesisValidator, err error) {
 

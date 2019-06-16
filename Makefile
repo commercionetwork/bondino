@@ -1,8 +1,8 @@
 all: install
 
 install: go.sum
-	GO111MODULE=on go install -tags "$(build_tags)" ./cmd/kavad
-	GO111MODULE=on go install -tags "$(build_tags)" ./cmd/kavacli
+	GO111MODULE=on go install -tags "$(build_tags)" ./cmd/tmntd
+	GO111MODULE=on go install -tags "$(build_tags)" ./cmd/tmntcli
 
 go.sum: go.mod
 	@echo "--> Ensure dependencies have not been modified"
