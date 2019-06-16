@@ -1,15 +1,10 @@
 package client
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pool/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
-	amino "github.com/tendermint/go-amino"
-
-<<<<<<< Updated upstream
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client/cli"
-=======
-	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/liquidator/client/cli"
->>>>>>> Stashed changes
+	"github.com/tendermint/go-amino"
 )
 
 // ModuleClient exports all client functionality from this module
@@ -26,12 +21,13 @@ func NewModuleClient(storeKey string, cdc *amino.Codec) ModuleClient {
 // GetQueryCmd returns the cli query commands for this module
 func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 	queryCmd := &cobra.Command{
-		Use:   "liquidator",
-		Short: "Querying commands for the liquidator module",
+		Use:   "pool",
+		Short: "Querying commands for the pool module",
 	}
 
 	queryCmd.AddCommand(client.GetCommands(
-		cli.GetCmd_GetOutstandingDebt(mc.storeKey, mc.cdc),
+		cli.GetCmdGetFunds(mc.storeKey, mc.cdc),
+		cli.GetCmdGetAllFunds(mc.storeKey, mc.cdc),
 	)...)
 
 	return queryCmd
@@ -40,13 +36,13 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 // GetTxCmd returns the transaction commands for this module
 func (mc ModuleClient) GetTxCmd() *cobra.Command {
 	txCmd := &cobra.Command{
-		Use:   "liquidator",
-		Short: "Liquidator transactions subcommands",
+		Use:   "pool",
+		Short: "Pool transactions subcommands",
 	}
 
 	txCmd.AddCommand(client.PostCommands(
-		cli.GetCmd_SeizeAndStartCollateralAuction(mc.cdc),
-		cli.GetCmd_StartDebtAuction(mc.cdc),
+		cli.GetCmdDepositFunds(mc.cdc),
+		cli.GetCmdWithdrawFunds(mc.cdc),
 	)...)
 
 	return txCmd

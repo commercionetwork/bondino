@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pool"
 	"io"
 	"os"
 
@@ -20,10 +21,17 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/slashing"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/kava-labs/kava-devnet/blockchain/x/auction"
-	"github.com/kava-labs/kava-devnet/blockchain/x/cdp"
-	"github.com/kava-labs/kava-devnet/blockchain/x/liquidator"
-	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
+<<<<<<< Updated upstream
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
+=======
+	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/auction"
+	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/cdp"
+	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/liquidator"
+	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed"
+>>>>>>> Stashed changes
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -65,6 +73,7 @@ func init() {
 		cdp.AppModuleBasic{},
 		liquidator.AppModuleBasic{},
 		pricefeed.AppModule{},
+		pool.AppModule{},
 	)
 }
 
@@ -110,6 +119,7 @@ type KavaApp struct {
 	keyAuction       *sdk.KVStoreKey
 	keyCdp           *sdk.KVStoreKey
 	keyLiquidator    *sdk.KVStoreKey
+	keyPool          *sdk.KVStoreKey
 
 	// keepers from cosmos-sdk
 	accountKeeper       auth.AccountKeeper
@@ -128,6 +138,7 @@ type KavaApp struct {
 	cdpKeeper        cdp.Keeper
 	liquidatorKeeper liquidator.Keeper
 	pricefeedKeeper  pricefeed.Keeper
+	poolKeeper       pool.Keeper
 
 	// the module manager
 	mm *sdk.ModuleManager
@@ -166,6 +177,7 @@ func NewKavaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 		keyAuction:       sdk.NewKVStoreKey("auction"),
 		keyCdp:           sdk.NewKVStoreKey("cdp"),
 		keyLiquidator:    sdk.NewKVStoreKey("liquidator"),
+		keyPool:          sdk.NewKVStoreKey("pool"),
 	}
 
 	// The ParamsKeeper handles parameter storage for the application
@@ -217,6 +229,11 @@ func NewKavaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 		app.auctionKeeper,
 		app.cdpKeeper, // CDP keeper standing in for bank
 	)
+	app.poolKeeper = pool.NewKeeper(
+		app.keyPool,
+		app.bankKeeper,
+		app.cdc,
+	)
 
 	// register the proposal types
 	govRouter := gov.NewRouter()
@@ -247,6 +264,7 @@ func NewKavaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 		cdp.NewAppModule(app.cdpKeeper),
 		liquidator.NewAppModule(app.liquidatorKeeper),
 		pricefeed.NewAppModule(app.pricefeedKeeper),
+		pool.NewAppModule(app.poolKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -262,7 +280,7 @@ func NewKavaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 	app.mm.SetOrderInitGenesis(genaccounts.ModuleName, distr.ModuleName,
 		staking.ModuleName, auth.ModuleName, bank.ModuleName, slashing.ModuleName,
 		gov.ModuleName, mint.ModuleName, crisis.ModuleName, genutil.ModuleName,
-		auction.ModuleName, cdp.ModuleName, liquidator.ModuleName, pricefeed.ModuleName)
+		auction.ModuleName, cdp.ModuleName, liquidator.ModuleName, pricefeed.ModuleName, pool.ModuleName)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
 	app.mm.RegisterRoutes(app.Router(), app.QueryRouter())
@@ -284,6 +302,7 @@ func NewKavaApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 		app.keyAuction,
 		app.keyCdp,
 		app.keyLiquidator,
+		app.keyPool,
 	)
 
 	// The initChainer handles translating the genesis.json file into initial state for the network

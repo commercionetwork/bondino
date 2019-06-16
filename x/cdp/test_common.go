@@ -6,7 +6,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/mock"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
+<<<<<<< Updated upstream
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
+=======
+	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed"
+>>>>>>> Stashed changes
 )
 
 // Mock app is an ABCI app with an in memory database.

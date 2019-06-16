@@ -23,17 +23,19 @@ func NewHandler(k Keeper) sdk.Handler {
 // do proposers need to post the round in the message? If not, how do we determine the round?
 
 // HandleMsgPostPrice handles prices posted by oracles
-func HandleMsgPostPrice(
-	ctx sdk.Context,
-	k Keeper,
-	msg MsgPostPrice) sdk.Result {
+func HandleMsgPostPrice(ctx sdk.Context, k Keeper, msg MsgPostPrice) sdk.Result {
 
 	// TODO cleanup message validation and errors
 	err := k.ValidatePostPrice(ctx, msg)
 	if err != nil {
 		return err.Result()
 	}
-	k.SetPrice(ctx, msg.From, msg.AssetCode, msg.Price, msg.Expiry)
+
+	_, err = k.SetPrice(ctx, msg.From, msg.AssetCode, msg.Price, msg.Expiry)
+	if err != nil {
+		return err.Result()
+	}
+
 	return sdk.Result{}
 }
 
@@ -46,5 +48,7 @@ func EndBlocker(ctx sdk.Context, k Keeper) sdk.Tags {
 	// which occur during a block
 	//TODO use an iterator and update the prices for all assets in the store
 	k.SetCurrentPrices(ctx)
+
+
 	return sdk.Tags{}
 }

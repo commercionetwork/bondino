@@ -3,12 +3,16 @@ package cli
 import (
 	"fmt"
 
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
+<<<<<<< Updated upstream
+=======
+	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed"
+>>>>>>> Stashed changes
 	"github.com/spf13/cobra"
 )
 

@@ -1,9 +1,12 @@
 package cdp
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/kava-labs/kava-devnet/blockchain/x/cdp/client"
-	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
+<<<<<<< Updated upstream
+=======
+	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed"
+>>>>>>> Stashed changes
 )
 
 type bankKeeper interface {
@@ -14,9 +17,13 @@ type bankKeeper interface {
 }
 
 type pricefeedKeeper interface {
-	GetCurrentPrice(sdk.Context, client.Token) pricefeed.CurrentPrice
+<<<<<<< Updated upstream
+	GetCurrentPrice(sdk.Context, string) pricefeed.CurrentPrice
+=======
+	GetCurrentPrice(context sdk.Context, assetCode string, assetName string) pricefeed.CurrentPrice
+>>>>>>> Stashed changes
 	// These are used for testing TODO replace mockApp with keeper in tests to remove these
-	AddAsset(sdk.Context, string, string)
-	SetPrice(sdk.Context, sdk.AccAddress, string, sdk.Dec, sdk.Int) (pricefeed.PostedPrice, sdk.Error)
+	AddAsset(context sdk.Context, assetCode string, assetString string)
+	SetPrice(context sdk.Context, oracle sdk.AccAddress, assetCode string, assetName string, price sdk.Dec, expiry sdk.Int) (pricefeed.PostedPrice, sdk.Error)
 	SetCurrentPrices(sdk.Context) sdk.Error
 }

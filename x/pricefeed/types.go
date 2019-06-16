@@ -6,8 +6,10 @@ import (
 
 // Asset struct that represents an asset in the pricefeed
 type Asset struct {
-	AssetCode   string `json:"asset_code"`
-	Description string `json:"description"`
+	Type        string `json:"type"`        // Either nft or ft
+	AssetCode   string `json:"asset_code"`  // The nft id, otherwise empty
+	AssetName   string `json:"asset_name"`  // Either the ft name or nft name
+	Description string `json:"description"` // The asset description
 }
 
 // Oracle struct that documents which address an oracle is using
@@ -17,6 +19,7 @@ type Oracle struct {
 
 // CurrentPrice struct that contains the metadata of a current price for a particular asset in the pricefeed module.
 type CurrentPrice struct {
+	AssetName string  `json:"asset_name"`
 	AssetCode string  `json:"asset_code"`
 	Price     sdk.Dec `json:"price"`
 	Expiry    sdk.Int `json:"expiry"`
@@ -24,17 +27,17 @@ type CurrentPrice struct {
 
 // PostedPrice struct represented a price for an asset posted by a specific oracle
 type PostedPrice struct {
+	AssetName     string  `json:"asset_name"`
 	AssetCode     string  `json:"asset_code"`
 	OracleAddress string  `json:"oracle_address"`
 	Price         sdk.Dec `json:"price"`
 	Expiry        sdk.Int `json:"expiry"`
 }
 
-// PendingEstimableAsset struct that contains asset to estimate and the information about the estimated.
-type EstimableAsset struct {
-	OracleAddress string `json:"oracle_address"`
+// PendingPriceAsset struct that contains the info about the asset which price is still to be determined
+type PendingPriceAsset struct {
+	AssetName     string `json:"asset_name"`
 	AssetCode     string `json:"asset_code"`
-	Estimed       string `json:"estimed"`
 }
 
 // SortDecs provides the interface needed to sort sdk.Dec slices

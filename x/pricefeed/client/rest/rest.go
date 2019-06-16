@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 	"github.com/gorilla/mux"
-	"github.com/kava-labs/kava-devnet/blockchain/x/pricefeed"
+<<<<<<< Updated upstream
+=======
+	"github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed"
+>>>>>>> Stashed changes
 
 	clientrest "github.com/cosmos/cosmos-sdk/client/rest"
 	sdk "github.com/cosmos/cosmos-sdk/types"

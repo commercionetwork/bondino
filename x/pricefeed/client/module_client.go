@@ -1,8 +1,12 @@
 package client
 
 import (
+	pricefeedcmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
-	pricefeedcmd "github.com/kava-labs/kava-devnet/blockchain/x/pricefeed/client/cli"
+<<<<<<< Updated upstream
+=======
+	pricefeedcmd "github.com/commercionetwork/cosmos-hackathom-2019/blockchain/x/pricefeed/client/cli"
+>>>>>>> Stashed changes
 	"github.com/spf13/cobra"
 	amino "github.com/tendermint/go-amino"
 )

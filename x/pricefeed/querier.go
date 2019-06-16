@@ -15,10 +15,15 @@ import (
 const (
 	// QueryCurrentPrice command for current price queries
 	QueryCurrentPrice = "price"
+
 	// QueryRawPrices command for raw price queries
 	QueryRawPrices = "rawprices"
+
 	// QueryAssets command for assets query
 	QueryAssets = "assets"
+
+	// QueryPendingPrices command for pending prices
+	QueryPendingPrices = "pending-prices"
 )
 
 // implement fmt.Stringer
@@ -40,6 +45,12 @@ Expiry: %s`, pp.AssetCode, pp.OracleAddress, pp.Price, pp.Expiry))
 func (a Asset) String() string {
 	return strings.TrimSpace(fmt.Sprintf(`AssetCode: %s
 Description: %s`, a.AssetCode, a.Description))
+}
+
+// implement fmt.Stringer
+func (a PendingPriceAsset) String() string {
+	return strings.TrimSpace(fmt.Sprintf(`AssetName: %s
+AssetCode: %s`, a.AssetName, a.AssetCode))
 }
 
 // QueryRawPricesResp response to a rawprice query
@@ -68,6 +79,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryRawPrices(ctx, path[1:], req, keeper)
 		case QueryAssets:
 			return queryAssets(ctx, req, keeper)
+		case QueryPendingPrices:
+			return queryPendingPrices(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown pricefeed query endpoint")
 		}
@@ -76,12 +89,13 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 }
 
 func queryCurrentPrice(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
-	assetCode := path[0]
-	_, found := keeper.GetAsset(ctx, assetCode)
+	assetName := path[0]
+	assetCode := path[1]
+	_, found := keeper.GetAsset(ctx, assetCode, assetName)
 	if !found {
 		return []byte{}, sdk.ErrUnknownRequest("asset not found")
 	}
-	currentPrice := keeper.GetCurrentPrice(ctx, assetCode)
+	currentPrice := keeper.GetCurrentPrice(ctx, assetCode, assetName)
 
 	bz, err2 := codec.MarshalJSONIndent(keeper.cdc, currentPrice)
 	if err2 != nil {
@@ -93,12 +107,13 @@ func queryCurrentPrice(ctx sdk.Context, path []string, req abci.RequestQuery, ke
 
 func queryRawPrices(ctx sdk.Context, path []string, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
 	var priceList QueryRawPricesResp
-	assetCode := path[0]
-	_, found := keeper.GetAsset(ctx, assetCode)
+	assetName := path[0]
+	assetCode := path[1]
+	_, found := keeper.GetAsset(ctx, assetCode, assetName)
 	if !found {
 		return []byte{}, sdk.ErrUnknownRequest("asset not found")
 	}
-	rawPrices := keeper.GetRawPrices(ctx, assetCode)
+	rawPrices := keeper.GetRawPrices(ctx, assetCode, assetName)
 	for _, price := range rawPrices {
 		priceList = append(priceList, price.String())
 	}
@@ -113,6 +128,20 @@ func queryRawPrices(ctx sdk.Context, path []string, req abci.RequestQuery, keepe
 func queryAssets(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
 	var assetList QueryAssetsResp
 	assets := keeper.GetAssets(ctx)
+	for _, asset := range assets {
+		assetList = append(assetList, asset.String())
+	}
+	bz, err2 := codec.MarshalJSONIndent(keeper.cdc, assetList)
+	if err2 != nil {
+		panic("could not marshal result to JSON")
+	}
+
+	return bz, nil
+}
+
+func queryPendingPrices(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) (res []byte, err sdk.Error) {
+	var assetList QueryAssetsResp
+	assets := keeper.GetPendingPriceAssets(ctx)
 	for _, asset := range assets {
 		assetList = append(assetList, asset.String())
 	}
