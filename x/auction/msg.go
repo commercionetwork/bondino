@@ -56,7 +56,7 @@ func (msg MsgPlaceBid) GetSigners() []sdk.AccAddress {
 
 // type MsgStartForwardAuction struct {
 // 	Seller sdk.AccAddress
-// 	Amount sdk.Coins
+// 	CollateralValue sdk.Coins
 // 	// TODO add starting bid amount?
 // 	// TODO specify asset denom to be received
 // }
@@ -65,7 +65,7 @@ func (msg MsgPlaceBid) GetSigners() []sdk.AccAddress {
 // func NewMsgStartAuction(seller sdk.AccAddress, amount sdk.Coins, maxBid sdk.Coins) MsgStartAuction {
 // 	return MsgStartAuction{
 // 		Seller: seller,
-// 		Amount: amount,
+// 		CollateralValue: amount,
 // 		MaxBid: maxBid,
 // 	}
 // }

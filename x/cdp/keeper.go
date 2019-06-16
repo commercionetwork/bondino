@@ -59,8 +59,8 @@ func (k Keeper) getAssetCodeAndName(token token.Token) (string, string) {
 func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Collateral, liquidity Liquidity) sdk.Error {
 
 	// Phase 1: Get state, make changes in memory and check if they're ok.
+
 	collateralName := collateral.Token.GetName()
-	collateralAmount := collateral.Amount()
 
 	// Check collateral type ok
 	p := k.GetParams(ctx)
@@ -69,41 +69,44 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 	}
 
 	// Check the owner has enough collateral and stable coins
-	if collateralAmount.IsPositive() { // adding collateral to CDP
-		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralName, changeInCollateral)))
+
+	// adding collateral to CDP
+	if collateral.Amount.IsPositive() {
+		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralName, collateral.Amount)))
 		if !ok {
 			return sdk.ErrInsufficientCoins("not enough collateral in sender's account")
 		}
 	}
-	if changeInDebt.IsNegative() { // reducing debt, by adding stable coin to CDP
-		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, changeInDebt.Neg())))
+	// reducing liquidity, by adding stable coin to CDP
+	if liquidity.Coin.Amount.IsNegative() {
+		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, liquidity.Coin.Amount.Neg())))
 		if !ok {
 			return sdk.ErrInsufficientCoins("not enough stable coin in sender's account")
 		}
 	}
 
 	// Change collateral and debt recorded in CDP
+
 	// Get CDP (or create if not exists)
-	cdp, found := k.GetCDP(ctx, owner, collateralToken.GetName())
+	cdp, found := k.GetCDP(ctx, owner, collateralName)
 	if !found {
-		cdp = CDP{Owner: owner, Collateral: collateralToken, CollateralDenom: collateralToken.GetName(), CollateralAmount: sdk.ZeroInt(), Debt: sdk.ZeroInt()}
+		cdp = CDP{Owner: owner, Collateral: collateral, Liquidity: liquidity}
 	}
 	// Add/Subtract collateral and debt
-	cdp.CollateralAmount = cdp.CollateralAmount.Add(changeInCollateral)
-	if cdp.CollateralAmount.IsNegative() {
+	if cdp.Collateral.Amount.IsNegative() {
 		return sdk.ErrInternal(" can't withdraw more collateral than exists in CDP")
 	}
-	cdp.Debt = cdp.Debt.Add(changeInDebt)
-	if cdp.Debt.IsNegative() {
+	if cdp.Liquidity.Coin.Amount.IsNegative() {
 		return sdk.ErrInternal("can't pay back more debt than exists in CDP")
 	}
 
-	assetCode, assetName := k.getAssetCodeAndName(cdp.CollateralToken)
+	assetCode, assetName := k.getAssetCodeAndName(cdp.Collateral.Token)
 
 	isUnderCollateralized := cdp.IsUnderCollateralized(
 		k.pricefeed.GetCurrentPrice(ctx, assetCode, assetName).Price,
-		p.GetCollateralParams(cdp.CollateralDenom).LiquidationRatio,
+		p.GetCollateralParams(cdp.Collateral.Token.GetName()).LiquidationRatio,
 	)
+
 	if isUnderCollateralized {
 		return sdk.ErrInternal("Change to CDP would put it below liquidation ratio")
 	}
@@ -111,7 +114,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 
 	// Add/Subtract from global debt limit
 	gDebt := k.GetGlobalDebt(ctx)
-	gDebt = gDebt.Add(changeInDebt)
+	gDebt = gDebt.Add(liquidity.Coin.Amount)
 	if gDebt.IsNegative() {
 		return sdk.ErrInternal("global debt can't be negative") // This should never happen if debt per CDP can't be negative
 	}
@@ -120,15 +123,15 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 	}
 
 	// Add/Subtract from collateral debt limit
-	collateralState, found := k.GetCollateralState(ctx, cdp.CollateralDenom)
+	collateralState, found := k.GetCollateralState(ctx, cdp.Collateral.Token.GetName())
 	if !found {
-		collateralState = CollateralState{Denom: cdp.CollateralDenom, TotalDebt: sdk.ZeroInt()} // Already checked that this denom is authorized, so ok to create new CollateralState
+		collateralState = CollateralState{Denom: cdp.Collateral.Token.GetName(), TotalDebt: sdk.ZeroInt()} // Already checked that this denom is authorized, so ok to create new CollateralState
 	}
-	collateralState.TotalDebt = collateralState.TotalDebt.Add(changeInDebt)
+	collateralState.TotalDebt = collateralState.TotalDebt.Add(liquidity.Coin.Amount)
 	if collateralState.TotalDebt.IsNegative() {
 		return sdk.ErrInternal("total debt for this collateral type can't be negative") // This should never happen if debt per CDP can't be negative
 	}
-	if collateralState.TotalDebt.GT(p.GetCollateralParams(cdp.CollateralDenom).DebtLimit) {
+	if collateralState.TotalDebt.GT(p.GetCollateralParams(cdp.Collateral.Token.GetName()).DebtLimit) {
 		return sdk.ErrInternal("change to CDP would put the system over the debt limit for this collateral type")
 	}
 
@@ -136,24 +139,24 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral Coll
 
 	// change owner's coins (increase or decrease)
 	var err sdk.Error
-	if changeInCollateral.IsNegative() {
-		_, err = k.bank.AddCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralToken.GetName(), changeInCollateral.Neg())))
+	if collateral.Amount.IsNegative() {
+		_, err = k.bank.AddCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateral.Token.GetName(), collateral.Amount.Neg())))
 	} else {
-		_, err = k.bank.SubtractCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateralToken.GetName(), changeInCollateral)))
+		_, err = k.bank.SubtractCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateral.Token.GetName(), collateral.Amount)))
 	}
 	if err != nil {
 		panic(err) // this shouldn't happen because coin balance was checked earlier
 	}
-	if changeInDebt.IsNegative() {
-		_, err = k.bank.SubtractCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, changeInDebt.Neg())))
+	if liquidity.Coin.Amount.IsNegative() {
+		_, err = k.bank.SubtractCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, liquidity.Coin.Amount.Neg())))
 	} else {
-		_, err = k.bank.AddCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, changeInDebt)))
+		_, err = k.bank.AddCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, liquidity.Coin.Amount)))
 	}
 	if err != nil {
 		panic(err) // this shouldn't happen because coin balance was checked earlier
 	}
 	// Set CDP
-	if cdp.CollateralAmount.IsZero() && cdp.Debt.IsZero() { // TODO maybe abstract this logic into setCDP
+	if cdp.Collateral.Amount.IsZero() && cdp.Liquidity.Coin.Amount.IsZero() { // TODO maybe abstract this logic into setCDP
 		k.deleteCDP(ctx, cdp)
 	} else {
 		k.setCDP(ctx, cdp)
@@ -180,13 +183,13 @@ func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collatera
 		return sdk.ErrInternal("could not find CDP")
 	}
 
-	assetCode, assetName := k.getAssetCodeAndName(cdp.CollateralToken)
+	assetCode, assetName := k.getAssetCodeAndName(cdp.Collateral.Token)
 
 	// Check if CDP is undercollateralized
 	p := k.GetParams(ctx)
 	isUnderCollateralized := cdp.IsUnderCollateralized(
 		k.pricefeed.GetCurrentPrice(ctx, assetCode, assetName).Price,
-		p.GetCollateralParams(cdp.CollateralDenom).LiquidationRatio,
+		p.GetCollateralParams(cdp.Collateral.Token.GetName()).LiquidationRatio,
 	)
 	if !isUnderCollateralized {
 		return sdk.ErrInternal("CDP is not currently under the liquidation ratio")
@@ -196,8 +199,8 @@ func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collatera
 	if collateralToSeize.IsNegative() {
 		return sdk.ErrInternal("cannot seize negative collateral")
 	}
-	cdp.CollateralAmount = cdp.CollateralAmount.Sub(collateralToSeize)
-	if cdp.CollateralAmount.IsNegative() {
+	//cdp.CollateralAmount = cdp.CollateralAmount.Sub(collateralToSeize)
+	if cdp.Collateral.Amount.IsNegative() {
 		return sdk.ErrInternal("can't seize more collateral than exists in CDP")
 	}
 
@@ -205,13 +208,13 @@ func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collatera
 	if debtToSeize.IsNegative() {
 		return sdk.ErrInternal("cannot seize negative debt")
 	}
-	cdp.Debt = cdp.Debt.Sub(debtToSeize)
-	if cdp.Debt.IsNegative() {
+	//cdp.Debt = cdp.Debt.Sub(debtToSeize)
+	if cdp.Liquidity.Coin.Amount.IsNegative() {
 		return sdk.ErrInternal("can't seize more debt than exists in CDP")
 	}
 
 	// Update debt per collateral type
-	collateralState, found := k.GetCollateralState(ctx, cdp.CollateralDenom)
+	collateralState, found := k.GetCollateralState(ctx, cdp.Collateral.Token.GetName())
 	if !found {
 		return sdk.ErrInternal("could not find collateral state")
 	}
@@ -224,7 +227,8 @@ func (k Keeper) PartialSeizeCDP(ctx sdk.Context, owner sdk.AccAddress, collatera
 	// TODO update global seized debt? this is what maker does (named vice in Vat.grab) but it's not used anywhere
 
 	// Store updated state
-	if cdp.CollateralAmount.IsZero() && cdp.Debt.IsZero() { // TODO maybe abstract this logic into setCDP
+
+	if cdp.Collateral.Amount.IsZero() && cdp.Liquidity.Coin.Amount.IsZero() { // TODO maybe abstract this logic into setCDP
 		k.deleteCDP(ctx, cdp)
 	} else {
 		k.setCDP(ctx, cdp)
@@ -305,13 +309,13 @@ func (k Keeper) setCDP(ctx sdk.Context, cdp CDP) {
 	store := ctx.KVStore(k.storeKey)
 	// marshal and set
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(cdp)
-	store.Set(k.getCDPKey(cdp.Owner, cdp.CollateralDenom), bz)
+	store.Set(k.getCDPKey(cdp.Owner, cdp.Collateral.Token.GetName()), bz)
 }
 func (k Keeper) deleteCDP(ctx sdk.Context, cdp CDP) { // TODO should this id the cdp by passing in owner,collateralDenom pair?
 	// get store
 	store := ctx.KVStore(k.storeKey)
 	// delete key
-	store.Delete(k.getCDPKey(cdp.Owner, cdp.CollateralDenom))
+	store.Delete(k.getCDPKey(cdp.Owner, cdp.Collateral.Token.GetName()))
 }
 
 // GetCDPs returns all CDPs, optionally filtered by collateral type and liquidation price.

@@ -10,7 +10,7 @@ import (
 
 type Collateral struct {
 	Token        token.Token `json:"token"`
-	Qty          sdk.Int     `json:"qty"`
+	Amount       sdk.Int     `json:"qty"`
 	InitialPrice sdk.Dec     `json:"initial_price"`
 }
 
@@ -20,21 +20,21 @@ func (c Collateral) String() string {
   Quantity: 	 %s
   Initial price: %s`,
 		c.Token,
-		c.Qty,
+		c.Amount,
 		c.InitialPrice,
 	))
 }
 
 //evaluate the collateral amount
-func (c Collateral) Amount() sdk.Dec {
-	decQty := sdk.NewDec(c.Qty.Int64())
+func (c Collateral) CollateralValue() sdk.Dec {
+	decQty := sdk.NewDec(c.Amount.Int64())
 
 	return decQty.Mul(c.InitialPrice)
 }
 
 type Liquidity struct {
 	Coin         sdk.Coin `json:"coin"`
-	InitialPrice sdk.Int  `json:"initial_price"`
+	InitialPrice sdk.Dec  `json:"initial_price"`
 }
 
 func (l Liquidity) String() string {
@@ -55,7 +55,7 @@ type CDP struct {
 }
 
 func (cdp CDP) IsUnderCollateralized(price sdk.Dec, liquidationRatio sdk.Dec) bool {
-	collateralValue := sdk.NewDecFromInt(cdp.Collateral.Qty).Mul(price)
+	collateralValue := sdk.NewDecFromInt(cdp.Collateral.Amount).Mul(price)
 	minCollateralValue := liquidationRatio.Mul(sdk.NewDecFromInt(cdp.Liquidity.Coin.Amount))
 	return collateralValue.LT(minCollateralValue) // TODO LT or LTE?
 }
@@ -91,15 +91,15 @@ func (cdps byCollateralRatio) Less(i, j int) bool {
 	// The comparison is: collat_i/debt_i < collat_j/debt_j
 	// But to avoid division this can be rearranged to: collat_i*debt_j < collat_j*debt_i
 	// Provided the values are positive, so check for positive values.
-	if cdps[i].Collateral.Qty.IsNegative() ||
+	if cdps[i].Collateral.Amount.IsNegative() ||
 		cdps[i].Liquidity.Coin.Amount.IsNegative() ||
-		cdps[j].Collateral.Qty.IsNegative() ||
+		cdps[j].Collateral.Amount.IsNegative() ||
 		cdps[j].Liquidity.Coin.Amount.IsNegative() {
 		panic("negative collateral and debt not supported in CDPs")
 	}
 	// TODO overflows could cause panics
-	left := cdps[i].Collateral.Qty.Mul(cdps[j].Liquidity.Coin.Amount)
-	right := cdps[j].Collateral.Qty.Mul(cdps[i].Liquidity.Coin.Amount)
+	left := cdps[i].Collateral.Amount.Mul(cdps[j].Liquidity.Coin.Amount)
+	right := cdps[j].Collateral.Amount.Mul(cdps[i].Liquidity.Coin.Amount)
 	return left.LT(right)
 }
 
