@@ -96,10 +96,12 @@ func GetCmd_GetUnderCollateralizedCdps(queryRoute string, cdc *codec.Codec) *cob
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 			// Prepare params for querier
-			price, errSdk := sdk.NewDecFromStr(args[1])
-			if errSdk != nil {
-				return fmt.Errorf(errSdk.Error()) // TODO check this returns useful output
+			price, ok := sdk.NewIntFromString(args[1])
+			if !ok {
+				fmt.Printf("invalid price - %s \n", string(args[1]))
+				return nil
 			}
+
 			bz, err := cdc.MarshalJSON(cdp.QueryCdpsParams{
 				CollateralName:        args[0],
 				UnderCollateralizedAt: price,

@@ -24,17 +24,21 @@ func GetCmdPostPrice(cdc *codec.Codec) *cobra.Command {
 			if err := cliCtx.EnsureAccountExists(); err != nil {
 				return err
 			}
-			price, err := sdk.NewDecFromStr(args[1])
-			if err != nil {
-				return err
+
+			price, ok := sdk.NewIntFromString(args[1])
+			if !ok {
+				fmt.Printf("invalid price - %s \n", string(args[1]))
+				return nil
 			}
+
 			expiry, ok := sdk.NewIntFromString(args[2])
 			if !ok {
 				fmt.Printf("invalid expiry - %s \n", string(args[2]))
 				return nil
 			}
+
 			msg := pricefeed.NewMsgPostPrice(cliCtx.GetFromAddress(), args[0], price, expiry)
-			err = msg.ValidateBasic()
+			err := msg.ValidateBasic()
 			if err != nil {
 				return err
 			}

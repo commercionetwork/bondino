@@ -93,7 +93,7 @@ func (k Keeper) AddAsset(ctx sdk.Context, assetCode string, desc string) {
 }
 
 // SetPrice updates the posted price for a specific oracle
-func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName string, assetCode string, price sdk.Dec, expiry sdk.Int) (types.PostedPrice, sdk.Error) {
+func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName string, assetCode string, price sdk.Int, expiry sdk.Int) (types.PostedPrice, sdk.Error) {
 	// If the expiry is less than or equal to the current blockheight, we consider the price valid
 	if expiry.GTE(sdk.NewInt(ctx.BlockHeight())) {
 		store := ctx.KVStore(k.priceStoreKey)
@@ -150,13 +150,13 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 			}
 		}
 		l := len(notExpiredPrices)
-		var medianPrice sdk.Dec
+		var medianPrice sdk.Int
 		var expiry sdk.Int
 		// TODO make threshold for acceptance (ie. require 51% of oracles to have posted valid prices
 		if l == 0 {
 			// Error if there are no valid prices in the raw pricefeed
 			// return ErrNoValidPrice(k.codespace)
-			medianPrice = sdk.NewDec(0)
+			medianPrice = sdk.NewInt(0)
 			expiry = sdk.NewInt(0)
 		} else if l == 1 {
 			// Return immediately if there's only one price
@@ -174,7 +174,7 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 				price1 := notExpiredPrices[l/2-1].Price
 				price2 := notExpiredPrices[l/2].Price
 				sum := price1.Add(price2)
-				divsor, _ := sdk.NewDecFromStr("2")
+				divsor := sdk.NewInt(2)
 				medianPrice = sum.Quo(divsor)
 				// TODO Check if safe, makes sense
 				// Takes the average of the two expiries rounded down to the nearest Int.

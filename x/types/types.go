@@ -48,7 +48,7 @@ func (l Liquidity) String() string {
 type CurrentPrice struct {
 	AssetName string  `json:"asset_name"`
 	AssetCode string  `json:"asset_code"`
-	Price     sdk.Dec `json:"price"`
+	Price     sdk.Int `json:"price"`
 	Expiry    sdk.Int `json:"expiry"`
 }
 
@@ -67,8 +67,8 @@ type CDP struct {
 	Liquidity  Liquidity      `json:"liquidity"`  // Liquidity given to the user
 }
 
-func (cdp CDP) IsUnderCollateralized(price sdk.Dec, liquidationRatio sdk.Dec) bool {
-	collateralValue := sdk.NewDecFromInt(cdp.Collateral.Amount).Mul(price)
+func (cdp CDP) IsUnderCollateralized(price sdk.Int, liquidationRatio sdk.Dec) bool {
+	collateralValue := sdk.NewDecFromInt(cdp.Collateral.Amount).MulInt(price)
 	minCollateralValue := liquidationRatio.Mul(sdk.NewDecFromInt(cdp.Liquidity.Coin.Amount))
 	return collateralValue.LT(minCollateralValue) // TODO LT or LTE?
 }

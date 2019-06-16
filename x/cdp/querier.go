@@ -31,7 +31,7 @@ type QueryCdpsParams struct {
 	CollateralName        string         // get CDPs collateral name
 	NftID                 string         //  get CDPs collateral ID
 	Owner                 sdk.AccAddress //   get CDPs belonging to this owner
-	UnderCollateralizedAt sdk.Dec        //    get CDPs that will be below the liquidation ratio when the collateral is at this price.
+	UnderCollateralizedAt sdk.Int        //    get CDPs that will be below the liquidation ratio when the collateral is at this price.
 }
 
 // queryGetCdps fetches CDPs, optionally filtering by any of the query params (in QueryCdpsParams).

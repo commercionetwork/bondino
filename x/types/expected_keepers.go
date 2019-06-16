@@ -13,7 +13,7 @@ type CdpKeeper interface {
 	GetStableDenom() string
 	GetGovDenom() string
 	GetParams(ctx sdk.Context) CdpModuleParams
-	GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Dec) (CDPs, sdk.Error)
+	GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Int) (CDPs, sdk.Error)
 	GetCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string, nftID string) (CDP, bool)
 	GetGlobalDebt(ctx sdk.Context) sdk.Int
 	GetCollateralState(ctx sdk.Context, collateralDenom string) (CollateralState, bool)
@@ -28,7 +28,7 @@ type PricefeedKeeper interface {
 	GetCurrentPrice(context sdk.Context, assetCode string, assetName string) CurrentPrice
 	// These are used for testing TODO replace mockApp with keeper in tests to remove these
 	AddAsset(context sdk.Context, assetCode string, assetString string)
-	SetPrice(context sdk.Context, oracle sdk.AccAddress, assetCode string, assetName string, price sdk.Dec, expiry sdk.Int) (PostedPrice, sdk.Error)
+	SetPrice(context sdk.Context, oracle sdk.AccAddress, assetCode string, assetName string, price sdk.Int, expiry sdk.Int) (PostedPrice, sdk.Error)
 	SetCurrentPrices(sdk.Context) sdk.Error
 	AskForPrice(ctx sdk.Context, assetCode string, assetName string)
 }
@@ -38,7 +38,7 @@ type PostedPrice struct {
 	AssetName     string  `json:"asset_name"`
 	AssetCode     string  `json:"asset_code"`
 	OracleAddress string  `json:"oracle_address"`
-	Price         sdk.Dec `json:"price"`
+	Price         sdk.Int `json:"price"`
 	Expiry        sdk.Int `json:"expiry"`
 }
 

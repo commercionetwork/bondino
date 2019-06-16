@@ -11,8 +11,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
-// StableDenom asset code of the dollar-denominated debt coin
-const StableDenom = "usdx" // TODO allow to be changed
 // GovDenom asset code of the governance coin
 const GovDenom = "kava"
 
@@ -79,7 +77,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	}
 	// reducing liquidity, by adding stable coin to CDP
 	if liquidity.Coin.Amount.IsNegative() {
-		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, liquidity.Coin.Amount.Neg())))
+		ok := k.bank.HasCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateral.Token.GetName(), liquidity.Coin.Amount.Neg())))
 		if !ok {
 			return sdk.ErrInsufficientCoins("not enough stable coin in sender's account")
 		}
@@ -164,9 +162,9 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 		panic(err) // this shouldn't happen because coin balance was checked earlier
 	}
 	if liquidity.Coin.Amount.IsNegative() {
-		_, err = k.bank.SubtractCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, liquidity.Coin.Amount.Neg())))
+		_, err = k.bank.SubtractCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateral.Token.GetName(), liquidity.Coin.Amount.Neg())))
 	} else {
-		_, err = k.bank.AddCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(StableDenom, liquidity.Coin.Amount)))
+		_, err = k.bank.AddCoins(ctx, owner, sdk.NewCoins(sdk.NewCoin(collateral.Token.GetName(), liquidity.Coin.Amount)))
 	}
 	if err != nil {
 		panic(err) // this shouldn't happen because coin balance was checked earlier
@@ -179,11 +177,11 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 		return sdk.ErrInvalidCoins("Liquidity price cant be equal to zero")
 	}
 
-	var liquidityAmount sdk.Dec
+	// get the collateral value = price * quantity
+	collateralValue := collateralCurrentPrice.Price.Mul(collateral.Amount)
 
-	liquidityAmount.Div(collateralCurrentPrice.Price.Int, liquidityCurrentPrice.Price.Int)
-
-	cdp.Liquidity.Coin.Amount = liquidityAmount.RoundInt()
+	// get the liquidity amount = collateral-value / liquidity price
+	cdp.Liquidity.Coin.Amount = collateralValue.Quo(liquidityCurrentPrice.Price)
 
 	if cdp.Collateral.Amount.IsZero() && cdp.Liquidity.Coin.Amount.IsZero() { // TODO maybe abstract this logic into setCDP
 		k.deleteCDP(ctx, cdp)
@@ -289,8 +287,9 @@ func (k Keeper) ReduceGlobalDebt(ctx sdk.Context, amount sdk.Int) sdk.Error {
 	return nil
 }
 
+// deprecated - use collateral.Token.GetName() instead
 func (k Keeper) GetStableDenom() string {
-	return StableDenom
+	return ""
 }
 func (k Keeper) GetGovDenom() string {
 	return GovDenom
@@ -358,13 +357,13 @@ func (k Keeper) deleteCDP(ctx sdk.Context, cdp types.CDP) { // TODO should this 
 
 // GetCDPs returns all CDPs, optionally filtered by collateral type and liquidation price.
 // `price` filters for CDPs that will be below the liquidation ratio when the collateral is at that specified price.
-func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Dec) (types.CDPs, sdk.Error) {
+func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Int) (types.CDPs, sdk.Error) {
 	// Validate inputs
 	params := k.GetParams(ctx)
 	if len(collateralDenom) != 0 && !params.IsCollateralPresent(collateralDenom) {
 		return nil, sdk.ErrInternal("collateral denom not authorized")
 	}
-	if len(collateralDenom) == 0 && !(price.IsNil() || price.IsNegative()) {
+	if len(collateralDenom) == 0 && !price.IsNegative() {
 		return nil, sdk.ErrInternal("cannot specify price without collateral denom")
 	}
 
@@ -385,7 +384,7 @@ func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Dec) 
 
 	// Filter for CDPs that would be under-collateralized at the specified price
 	// If price is nil or -ve, skip the filtering as it would return all CDPs anyway
-	if !price.IsNil() && !price.IsNegative() {
+	if !price.IsNegative() {
 		var filteredCDPs types.CDPs
 		for _, cdp := range cdps {
 			if cdp.IsUnderCollateralized(price, params.GetCollateralParams(collateralDenom).LiquidationRatio) {
