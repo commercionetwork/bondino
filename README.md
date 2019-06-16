@@ -58,7 +58,7 @@ kavacli query pool funds
 
 🔨 **WIP** 🔨
 
-### Collateralized Debt Position (`x/dbp`)
+### Collateralized Debt Position (`x/cbp`)
 > Allows to open a collateralized debt position (CDP) and later edit it.
 
 🔨 **WIP** 🔨
