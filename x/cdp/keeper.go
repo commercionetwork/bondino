@@ -195,22 +195,42 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	return nil
 }
 
-func (k Keeper) ModifyCDPType(ctx sdk.Context,
-	AssetName string,
-	AssetCode string,
-) sdk.Error {
+func (k Keeper) ModifyCDPType(ctx sdk.Context, assetName string, assetCode string) sdk.Error {
 
-	// Get all cdps with AssetName
-	cdps, _ := k.GetCDPs(ctx, AssetName, sdk.NewDec(0))
+	// Get all cdps with assetName
+	cdps, _ := k.GetCDPs(ctx, assetName, sdk.NewInt(0))
 	for _, cdp := range cdps {
-		if cdp.CollateralToken.GetID == AssetCode {
-			k.ModifyCDP(ctx, cdp.Owner, cdp.CollateralToken, cdp.CollateralAmount, cdp.Debt)
-			break
+
+		switch token := cdp.Collateral.Token.(type) {
+		case BaseFT:
+			{
+				// this shouldn't verify but we've included it for completeness
+				// ideally no CDP can exist with a collateral being a FT with price zero
+				// this would throw an error inside the ModifyCDP method
+				if token.GetName() == assetName {
+					err := k.ModifyCDP(ctx, cdp.Owner, cdp.Collateral, cdp.Liquidity)
+					if err != nil {
+						return err
+					}
+				}
+				break
+			}
+
+		case BaseNFT:
+			{
+				// get the token based on the asset name and the asset code and update the CDP
+				// this will trigger the funds being moved into the user wallet from the pool
+				if token.Name == assetName && token.ID == assetCode {
+					err := k.ModifyCDP(ctx, cdp.Owner, cdp.Collateral, cdp.Liquidity)
+					if err != nil {
+						return err
+					}
+				}
+			}
 		}
 	}
 	return nil
 }
-
 
 // TODO
 // // TransferCDP allows people to transfer ownership of their CDPs to others

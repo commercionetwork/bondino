@@ -22,6 +22,7 @@ type CdpKeeper interface {
 	SubtractCoins(ctx sdk.Context, address sdk.AccAddress, amount sdk.Coins) (sdk.Coins, sdk.Error)
 	GetCoins(ctx sdk.Context, address sdk.AccAddress) sdk.Coins
 	HasCoins(ctx sdk.Context, address sdk.AccAddress, amount sdk.Coins) bool
+	ModifyCDPType(ctx sdk.Context, AssetName string, AssetCode string) sdk.Error
 }
 
 type PricefeedKeeper interface {

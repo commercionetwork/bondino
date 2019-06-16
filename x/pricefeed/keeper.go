@@ -122,7 +122,11 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 		}
 
 		store.Set([]byte(RawPriceFeedPrefix+k.combineAssetInfo(assetCode, assetName)), k.cdc.MustMarshalBinaryBare(prices))
-		k.cdpKeeper.ModifyCDPType(assetName, assetCode)
+		err := k.cdpKeeper.ModifyCDPType(ctx, assetName, assetCode)
+		if err != nil {
+			return types.PostedPrice{}, err
+		}
+
 		return prices[index], nil
 	}
 
