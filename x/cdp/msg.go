@@ -1,26 +1,23 @@
 package cdp
 
 import (
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/token"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // MsgCreateOrModifyCDP creates, adds/removes collateral/stable coin from a cdp
 // TODO Make this more user friendly - maybe split into four functions.
 type MsgCreateOrModifyCDP struct {
-	Sender           sdk.AccAddress
-	CollateralToken  token.Token
-	CollateralChange sdk.Int
-	DebtChange       sdk.Int
+	Sender     sdk.AccAddress
+	Collateral Collateral
+	Liquidity  Liquidity
 }
 
 // NewMsgPlaceBid returns a new MsgPlaceBid.
-func NewMsgCreateOrModifyCDP(sender sdk.AccAddress, collateralToken token.Token, collateralChange sdk.Int, debtChange sdk.Int) MsgCreateOrModifyCDP {
+func NewMsgCreateOrModifyCDP(sender sdk.AccAddress, collateral Collateral, liquidity Liquidity) MsgCreateOrModifyCDP {
 	return MsgCreateOrModifyCDP{
-		Sender:           sender,
-		CollateralToken:  collateralToken,
-		CollateralChange: collateralChange,
-		DebtChange:       debtChange,
+		Sender:     sender,
+		Collateral: collateral,
+		Liquidity:  liquidity,
 	}
 }
 

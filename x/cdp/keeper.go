@@ -56,7 +56,12 @@ func (k Keeper) getAssetCodeAndName(token token.Token) (string, string) {
 
 // ModifyCDP creates, changes, or deletes a CDP
 // TODO can/should this function be split up?
-func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateralToken token.Token, changeInCollateral sdk.Int, changeInDebt sdk.Int) sdk.Error {
+func (k Keeper) ModifyCDP(ctx sdk.Context,
+	owner sdk.AccAddress,
+	collateralToken token.Token,
+	changeInCollateral sdk.Int,
+	changeInDebt sdk.Int,
+) sdk.Error {
 
 	// Phase 1: Get state, make changes in memory and check if they're ok.
 
