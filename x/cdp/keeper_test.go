@@ -17,11 +17,11 @@ import (
 var _, addrs = mock.GeneratePrivKeyAddressPairs(1)
 var ownerAddr = addrs[0]
 var collateralTest = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
-	Amount: i(100), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(1)}}}
+	Amount: i(10), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(20)}}}
 var collateralTest2 = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
-	Amount: i(100), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "pdw", Amount: i(1)}}}
+	Amount: i(4000), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "pdw", Amount: i(2000)}}}
 var collateralTest3 = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
-	Amount: i(100), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "btc", Amount: i(1)}}}
+	Amount: i(300), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "btc", Amount: i(500)}}}
 
 func TestKeeper_ModifyCDP(t *testing.T) {
 
@@ -210,7 +210,7 @@ func TestKeeper_GetCDPs(t *testing.T) {
 	mapp.BeginBlock(abci.RequestBeginBlock{Header: header})
 	ctx := mapp.BaseApp.NewContext(false, header)
 	// setup CDPs
-	_, addrs := mock.GeneratePrivKeyAddressPairs(2)
+	//_, addrs := mock.GeneratePrivKeyAddressPairs(2)
 	cdps := types.CDPs{
 		collateralTest,
 		collateralTest2,
@@ -264,6 +264,7 @@ func TestKeeper_GetCDPs(t *testing.T) {
 		},
 		returnedCdps,
 	)
+
 	// Check high price returns no CDPs
 	var num3, _ = sdk.NewIntFromString("999999999.99")
 	returnedCdps, err = keeper.GetCDPs(ctx, "xrp", num3)
@@ -272,21 +273,26 @@ func TestKeeper_GetCDPs(t *testing.T) {
 		types.CDPs(nil),
 		returnedCdps,
 	)
+
 	// Check unauthorized collateral denom returns error
 	var num4, _ = sdk.NewIntFromString("999999999.99")
 	_, err = keeper.GetCDPs(ctx, "a non existent coin", num4)
 	require.Error(t, err)
+
 	// Check price without collateral returns error
-	_, err = keeper.GetCDPs(ctx, "", d("0.34023"))
+	_, err = keeper.GetCDPs(ctx, "", num4)
 	require.Error(t, err)
+
 	// Check deleting a CDP removes it
 	keeper.deleteCDP(ctx, cdps[0])
-	returnedCdps, err = keeper.GetCDPs(ctx, "", sdk.Dec{})
+	returnedCdps, err = keeper.GetCDPs(ctx, "", sdk.Int{})
 	require.NoError(t, err)
 	require.Equal(t,
-		CDPs{
-			{addrs[0], "btc", i(10), i(20)},
-			{addrs[1], "xrp", i(4000), i(2000)}},
+		types.CDPs{
+			collateralTest,
+			collateralTest2,
+			collateralTest3,
+		},
 		returnedCdps,
 	)
 }
@@ -296,12 +302,12 @@ func TestKeeper_GetSetDeleteCDP(t *testing.T) {
 	header := abci.Header{Height: mapp.LastBlockHeight() + 1}
 	mapp.BeginBlock(abci.RequestBeginBlock{Header: header})
 	ctx := mapp.BaseApp.NewContext(false, header)
-	_, addrs := mock.GeneratePrivKeyAddressPairs(1)
-	cdp := CDP{addrs[0], "xrp", i(412), i(56)}
+	//_, addrs := mock.GeneratePrivKeyAddressPairs(1)
+	cdp := collateralTest
 
 	// write and read from store
 	keeper.setCDP(ctx, cdp)
-	readCDP, found := keeper.GetCDP(ctx, cdp.Owner, cdp.CollateralDenom)
+	readCDP, found := keeper.GetCDP(ctx, cdp.Owner, collateralTest.Collateral.Token.GetName(), "")
 
 	// check before and after match
 	require.True(t, found)
@@ -311,7 +317,7 @@ func TestKeeper_GetSetDeleteCDP(t *testing.T) {
 	keeper.deleteCDP(ctx, cdp)
 
 	// check auction does not exist
-	_, found = keeper.GetCDP(ctx, cdp.Owner, cdp.CollateralDenom)
+	_, found = keeper.GetCDP(ctx, cdp.Owner, collateralTest2.Collateral.Token.GetName(), "")
 	require.False(t, found)
 }
 func TestKeeper_GetSetGDebt(t *testing.T) {
@@ -336,7 +342,7 @@ func TestKeeper_GetSetCollateralState(t *testing.T) {
 	header := abci.Header{Height: mapp.LastBlockHeight() + 1}
 	mapp.BeginBlock(abci.RequestBeginBlock{Header: header})
 	ctx := mapp.BaseApp.NewContext(false, header)
-	collateralState := CollateralState{"xrp", i(15400)}
+	collateralState := types.CollateralState{Denom: "xrp", TotalDebt: i(2)}
 
 	// write and read from store
 	keeper.setCollateralState(ctx, collateralState)

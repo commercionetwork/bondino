@@ -1,6 +1,7 @@
 package cdp
 
 import (
+	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,28 +21,39 @@ func TestApp_CreateModifyDeleteCDP(t *testing.T) {
 	mapp.BeginBlock(abci.RequestBeginBlock{Header: header})
 	ctx := mapp.BaseApp.NewContext(false, header)
 	keeper.pricefeed.AddAsset(ctx, "xrp", "xrp test")
-	keeper.pricefeed.SetPrice(
-		ctx, sdk.AccAddress{}, "xrp",
-		sdk.MustNewDecFromStr("1.00"),
-		sdk.NewInt(10))
-	keeper.pricefeed.SetCurrentPrices(ctx)
+	_, err := keeper.pricefeed.SetPrice(ctx, sdk.AccAddress{}, "", "xrp", i(5), i(6))
+	if err != nil {
+		panic(err)
+	}
+	err = keeper.pricefeed.SetCurrentPrices(ctx)
+	if err != nil {
+		panic(err)
+	}
 	mapp.EndBlock(abci.RequestEndBlock{})
 	mapp.Commit()
 
+	//creating collateral
+	var collateralTest = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+		Amount: i(10), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "xrp", Amount: i(20)}}}
+	var collateralTest2 = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+		Amount: i(4000), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "pdw", Amount: i(2000)}}}
+	var collateralTest3 = types.CDP{Owner: ownerAddr, Collateral: types.Collateral{Token: BaseFT{TokenName: _FT},
+		Amount: i(-50), InitialPrice: i(1)}, Liquidity: types.Liquidity{Coin: sdk.Coin{Denom: "btc", Amount: i(-10)}}}
+
 	// Create CDP
-	msgs := []sdk.Msg{NewMsgCreateOrModifyCDP(testAddr, "xrp", i(10), i(5))}
+	msgs := []sdk.Msg{NewMsgCreateOrModifyCDP(testAddr, collateralTest.Collateral, collateralTest.Liquidity)}
 	mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, abci.Header{Height: mapp.LastBlockHeight() + 1}, msgs, []uint64{0}, []uint64{0}, true, true, testPrivKey)
 
-	mock.CheckBalance(t, mapp, testAddr, cs(c(StableDenom, 5), c("xrp", 90)))
+	mock.CheckBalance(t, mapp, testAddr, cs(c("xrp", 5), c("xrp", 90)))
 
 	// Modify CDP
-	msgs = []sdk.Msg{NewMsgCreateOrModifyCDP(testAddr, "xrp", i(40), i(5))}
+	msgs = []sdk.Msg{NewMsgCreateOrModifyCDP(testAddr, collateralTest2.Collateral, collateralTest2.Liquidity)}
 	mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, abci.Header{Height: mapp.LastBlockHeight() + 1}, msgs, []uint64{0}, []uint64{1}, true, true, testPrivKey)
 
-	mock.CheckBalance(t, mapp, testAddr, cs(c(StableDenom, 10), c("xrp", 50)))
+	mock.CheckBalance(t, mapp, testAddr, cs(c("pdw", 10), c("pdw", 50)))
 
 	// Delete CDP
-	msgs = []sdk.Msg{NewMsgCreateOrModifyCDP(testAddr, "xrp", i(-50), i(-10))}
+	msgs = []sdk.Msg{NewMsgCreateOrModifyCDP(testAddr, collateralTest3.Collateral, collateralTest3.Liquidity)}
 	mock.SignCheckDeliver(t, mapp.Cdc, mapp.BaseApp, abci.Header{Height: mapp.LastBlockHeight() + 1}, msgs, []uint64{0}, []uint64{2}, true, true, testPrivKey)
 
 	mock.CheckBalance(t, mapp, testAddr, cs(c("xrp", 100)))

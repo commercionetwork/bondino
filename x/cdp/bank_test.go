@@ -22,12 +22,12 @@ func TestKeeper_AddSubtractGetCoins(t *testing.T) {
 		amount        sdk.Coins
 		expectedCoins sdk.Coins
 	}{
-		{"addNormalAddress", normalAddr, true, cs(c(StableDenom, 53)), cs(c(StableDenom, 153), c(GovDenom, 100))},
-		{"subNormalAddress", normalAddr, false, cs(c(StableDenom, 53)), cs(c(StableDenom, 47), c(GovDenom, 100))},
-		{"addLiquidatorStable", LiquidatorAccountAddress, true, cs(c(StableDenom, 53)), cs(c(StableDenom, 153))},
-		{"subLiquidatorStable", LiquidatorAccountAddress, false, cs(c(StableDenom, 53)), cs(c(StableDenom, 47))},
-		{"addLiquidatorGov", LiquidatorAccountAddress, true, cs(c(GovDenom, 53)), cs(c(StableDenom, 100))},  // no change to balance
-		{"subLiquidatorGov", LiquidatorAccountAddress, false, cs(c(GovDenom, 53)), cs(c(StableDenom, 100))}, // no change to balance
+		{"addNormalAddress", normalAddr, true, cs(c("xrp", 53)), cs(c("xrp", 153), c(GovDenom, 100))},
+		{"subNormalAddress", normalAddr, false, cs(c("xrp", 53)), cs(c("xrp", 47), c(GovDenom, 100))},
+		{"addLiquidatorStable", LiquidatorAccountAddress, true, cs(c("xrp", 53)), cs(c("xrp", 153))},
+		{"subLiquidatorStable", LiquidatorAccountAddress, false, cs(c("xrp", 53)), cs(c("xrp", 47))},
+		{"addLiquidatorGov", LiquidatorAccountAddress, true, cs(c(GovDenom, 53)), cs(c("xrp", 100))},  // no change to balance
+		{"subLiquidatorGov", LiquidatorAccountAddress, false, cs(c(GovDenom, 53)), cs(c("xrp", 100))}, // no change to balance
 	}
 
 	for _, tc := range tests {
@@ -37,7 +37,7 @@ func TestKeeper_AddSubtractGetCoins(t *testing.T) {
 			// initialize an account with coins
 			genAcc := auth.BaseAccount{
 				Address: normalAddr,
-				Coins:   cs(c(StableDenom, 100), c(GovDenom, 100)),
+				Coins:   cs(c("xrp", 100), c(GovDenom, 100)),
 			}
 			mock.SetGenesis(mapp, []auth.Account{&genAcc})
 
@@ -45,7 +45,7 @@ func TestKeeper_AddSubtractGetCoins(t *testing.T) {
 			header := abci.Header{Height: mapp.LastBlockHeight() + 1}
 			mapp.BeginBlock(abci.RequestBeginBlock{Header: header})
 			ctx := mapp.BaseApp.NewContext(false, header)
-			keeper.setLiquidatorModuleAccount(ctx, LiquidatorModuleAccount{cs(c(StableDenom, 100))}) // set gov coin "balance" to zero
+			keeper.setLiquidatorModuleAccount(ctx, LiquidatorModuleAccount{cs(c("xrp", 100))}) // set gov coin "balance" to zero
 
 			// perform the test action
 			var err sdk.Error
