@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/cdp"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/types"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -10,7 +10,7 @@ import (
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
 	"github.com/spf13/cobra"
 
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/liquidator"
 )
 
 func GetCmd_SeizeAndStartCollateralAuction(cdc *codec.Codec) *cobra.Command {

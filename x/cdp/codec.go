@@ -1,7 +1,7 @@
 package cdp
 
 import (
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 )
 
@@ -20,6 +20,6 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgCreateOrModifyCDP{}, "cdp/MsgCreateOrModifyCDP", nil)
 	cdc.RegisterConcrete(MsgTransferCDP{}, "cdp/MsgTransferCDP", nil)
 	cdc.RegisterInterface((*types.Token)(nil), nil)
-	cdc.RegisterConcrete(BaseFT{}, "types/BaseFT", nil)
-	cdc.RegisterConcrete(BaseNFT{}, "types/BaseNFT", nil)
+	cdc.RegisterConcrete(BaseFT{}, "cdp/BaseFT", nil)
+	cdc.RegisterConcrete(BaseNFT{}, "cdp/BaseNFT", nil)
 }
