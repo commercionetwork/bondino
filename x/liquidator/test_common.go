@@ -11,9 +11,9 @@ import (
 	dbm "github.com/tendermint/tendermint/libs/db"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/auction"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/cdp"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/pricefeed"
 )
 
 // Avoid cluttering test cases with long function name

@@ -1,4 +1,4 @@
-module github.com/commercionetwork/cosmos-hackatom-2019/blockchain
+module github.com/commercionetwork/cosmos-hackatom-2019
 
 go 1.12
 

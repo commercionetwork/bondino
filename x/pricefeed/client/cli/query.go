@@ -2,9 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/types"
 
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/pricefeed"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/spf13/cobra"

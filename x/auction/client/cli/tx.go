@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/auction"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/codec"
