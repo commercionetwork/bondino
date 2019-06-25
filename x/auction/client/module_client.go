@@ -1,7 +1,7 @@
 package client
 
 import (
-	auctioncmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/auction/client/cli"
+	auctioncmd "github.com/commercionetwork/cosmos-hackatom-2019/x/auction/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
 	amino "github.com/tendermint/go-amino"

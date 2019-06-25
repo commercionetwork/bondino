@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pool"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/pool"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"

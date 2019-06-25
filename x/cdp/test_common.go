@@ -1,7 +1,7 @@
 package cdp
 
 import (
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pricefeed"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/pricefeed"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/mock"
