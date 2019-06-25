@@ -28,6 +28,16 @@ func DefaultGenesisState() GenesisState {
 					LiquidationRatio: sdk.MustNewDecFromStr("2.0"),
 					DebtLimit:        sdk.NewInt(500000),
 				},
+				{
+					Denom:            "uatom",
+					LiquidationRatio: sdk.MustNewDecFromStr("2.0"),
+					DebtLimit:        sdk.NewInt(500000),
+				},
+				{
+					Denom:            "eth",
+					LiquidationRatio: sdk.MustNewDecFromStr("1.5"),
+					DebtLimit:        sdk.NewInt(500000),
+				},
 			},
 		},
 		sdk.ZeroInt(),

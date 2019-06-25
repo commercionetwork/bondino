@@ -24,6 +24,14 @@ func DefaultGenesisState() GenesisState {
 					Denom:       "xrp",
 					AuctionSize: sdk.NewInt(1000),
 				},
+				{
+					Denom:       "uatom",
+					AuctionSize: sdk.NewInt(1000),
+				},
+				{
+					Denom:       "eth",
+					AuctionSize: sdk.NewInt(1),
+				},
 			},
 		},
 	}

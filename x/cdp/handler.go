@@ -23,6 +23,7 @@ func handleMsgCreateOrModifyCDP(ctx sdk.Context, keeper Keeper, msg MsgCreateOrM
 
 	err := keeper.ModifyCDP(ctx, msg.Sender, msg.Collateral, msg.Liquidity)
 	if err != nil {
+		fmt.Printf(err.Error())
 		return err.Result()
 	}
 

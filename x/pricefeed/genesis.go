@@ -25,6 +25,8 @@ func DefaultGenesisState() GenesisState {
 		[]Asset{
 			{Type: "ft", AssetName: "btc", Description: "a description"},
 			{Type: "nft", AssetName: "xrp", Description: "the standard"},
+			{Type: "ft", AssetName: "eth", Description: "ethereum coin"},
+			{Type: "ft", AssetName: "atm", Description: "cosmos coin"},
 		},
 		[]Oracle{}}
 }
