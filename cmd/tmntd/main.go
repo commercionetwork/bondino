@@ -50,7 +50,7 @@ func main() {
 	server.AddCommands(ctx, cdc, rootCmd, newApp, exportAppStateAndTMValidators)
 
 	// prepare and add flags
-	executor := cli.PrepareBaseCmd(rootCmd, "Kava", app.DefaultNodeHome)
+	executor := cli.PrepareBaseCmd(rootCmd, "Tmnt", app.DefaultNodeHome)
 	err := executor.Execute()
 	if err != nil {
 		// handle with #870

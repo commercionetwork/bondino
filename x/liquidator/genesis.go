@@ -25,7 +25,7 @@ func DefaultGenesisState() GenesisState {
 					AuctionSize: sdk.NewInt(1000),
 				},
 				{
-					Denom:       "uatom",
+					Denom:       "xlm",
 					AuctionSize: sdk.NewInt(1000),
 				},
 				{
