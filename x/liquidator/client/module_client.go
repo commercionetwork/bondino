@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	amino "github.com/tendermint/go-amino"
 
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/liquidator/client/cli"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/liquidator/client/cli"
 )
 
 // ModuleClient exports all client functionality from this module

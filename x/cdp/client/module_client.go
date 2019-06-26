@@ -1,7 +1,7 @@
 package client
 
 import (
-	cdpcmd "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/cdp/client/cli"
+	cdpcmd "github.com/commercionetwork/cosmos-hackatom-2019/x/cdp/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 
 	"github.com/spf13/cobra"

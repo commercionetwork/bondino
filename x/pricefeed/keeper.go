@@ -287,12 +287,21 @@ func (k Keeper) AskForPrice(ctx sdk.Context, assetCode string, assetName string)
 func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string, assetName string) types.CurrentPrice {
 
 	store := ctx.KVStore(k.priceStoreKey)
-	var storedPriceKey string
 
-	bz := store.Get([]byte(storedPriceKey))
+	bz := store.Get([]byte(k.combineAssetInfo(assetCode, assetName)))
 
 	var price types.CurrentPrice
-	k.cdc.MustUnmarshalBinaryBare(bz, &price)
+
+	if bz == nil {
+		price = types.CurrentPrice{
+			AssetName: assetName,
+			AssetCode: assetCode,
+			Price:     sdk.NewInt(0),
+			Expiry:    sdk.NewInt(0),
+		}
+	} else {
+		k.cdc.MustUnmarshalBinaryBare(bz, &price)
+	}
 
 	return price
 }

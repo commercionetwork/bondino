@@ -99,6 +99,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	if !found {
 		cdp = types.CDP{Owner: owner, Collateral: collateral, Liquidity: liquidity}
 	}
+
 	// Add/Subtract collateral and debt
 	if cdp.Collateral.Amount.IsNegative() {
 		return sdk.ErrInternal(" can't withdraw more collateral than exists in CDP")
@@ -111,20 +112,25 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 
 	collateralCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, assetCode, assetName)
 
+	//TODO FROM HERE, BUGGED CODE
+
 	// if the price is zero, then ask for the price of the token
 	if collateralCurrentPrice.Price.IsZero() {
 		k.pricefeed.AskForPrice(ctx, assetCode, assetName)
 	}
 
-	isUnderCollateralized := cdp.IsUnderCollateralized(
-		collateralCurrentPrice.Price,
-		p.GetCollateralParams(cdp.Collateral.Token.GetName()).LiquidationRatio,
-	)
+	fmt.Printf("ask price did not make the app explode - line 125\n")
+
+	isUnderCollateralized := cdp.IsUnderCollateralized(collateralCurrentPrice.Price,
+		p.GetCollateralParams(cdp.Collateral.Token.GetName()).LiquidationRatio)
 
 	if isUnderCollateralized {
 		return sdk.ErrInternal("Change to CDP would put it below liquidation ratio")
 	}
+
 	// TODO check for dust
+
+	fmt.Printf("before get global debt all works fine - line 136\n")
 
 	// Add/Subtract from global debt limit
 	gDebt := k.GetGlobalDebt(ctx)
@@ -170,7 +176,6 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 		panic(err) // this shouldn't happen because coin balance was checked earlier
 	}
 
-	//TODO Here calculate liquidityValue
 	// Set CDP
 	liquidityCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, "", liquidity.Coin.Denom)
 	if liquidityCurrentPrice.Price.IsZero() {
@@ -191,6 +196,8 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	// set total debts
 	k.setGlobalDebt(ctx, gDebt)
 	k.setCollateralState(ctx, collateralState)
+
+	fmt.Printf("ends without errors")
 
 	return nil
 }
