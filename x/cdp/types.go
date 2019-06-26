@@ -1,6 +1,6 @@
 package cdp
 
-import "github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
+import "github.com/commercionetwork/cosmos-hackatom-2019/x/types"
 
 // byCollateralRatio is used to sort CDPs
 type byCollateralRatio types.CDPs

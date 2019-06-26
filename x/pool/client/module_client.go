@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/pool/client/cli"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/pool/client/cli"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/go-amino"

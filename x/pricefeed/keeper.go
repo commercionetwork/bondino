@@ -1,7 +1,7 @@
 package pricefeed
 
 import (
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/x/types"
+	"github.com/commercionetwork/cosmos-hackatom-2019/x/types"
 	"sort"
 	"strings"
 

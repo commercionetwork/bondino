@@ -15,7 +15,7 @@ import (
 	genaccscli "github.com/cosmos/cosmos-sdk/x/auth/genaccounts/client/cli"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 
-	"github.com/commercionetwork/cosmos-hackatom-2019/blockchain/app"
+	"github.com/commercionetwork/cosmos-hackatom-2019/app"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/cli"
