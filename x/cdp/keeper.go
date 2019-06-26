@@ -112,14 +112,10 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 
 	collateralCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, assetCode, assetName)
 
-	//TODO FROM HERE, BUGGED CODE
-
 	// if the price is zero, then ask for the price of the token
 	if collateralCurrentPrice.Price.IsZero() {
 		k.pricefeed.AskForPrice(ctx, assetCode, assetName)
 	}
-
-	fmt.Printf("ask price did not make the app explode - line 125\n")
 
 	isUnderCollateralized := cdp.IsUnderCollateralized(collateralCurrentPrice.Price,
 		p.GetCollateralParams(cdp.Collateral.Token.GetName()).LiquidationRatio)
@@ -129,8 +125,6 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	}
 
 	// TODO check for dust
-
-	fmt.Printf("before get global debt all works fine - line 136\n")
 
 	// Add/Subtract from global debt limit
 	gDebt := k.GetGlobalDebt(ctx)
@@ -175,6 +169,8 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	if err != nil {
 		panic(err) // this shouldn't happen because coin balance was checked earlier
 	}
+
+	//TODO FROM HERE, BUGGED CODE
 
 	// Set CDP
 	liquidityCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, "", liquidity.Coin.Denom)

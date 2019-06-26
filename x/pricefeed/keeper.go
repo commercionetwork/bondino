@@ -47,11 +47,10 @@ const (
 
 // Keeper struct for pricefeed module
 type Keeper struct {
-	priceStoreKey          sdk.StoreKey
-	pricesRequestsStoreKey sdk.StoreKey
-	cdc                    *codec.Codec
-	codespace              sdk.CodespaceType
-	cdpKeeper              types.CdpKeeper
+	priceStoreKey sdk.StoreKey
+	cdc           *codec.Codec
+	codespace     sdk.CodespaceType
+	cdpKeeper     types.CdpKeeper
 }
 
 // NewKeeper returns a new keeper for the pricefeed modle
@@ -137,6 +136,8 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 // SetCurrentPrices updates the price of an asset to the median of all valid oracle inputs
 func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 	assets := k.GetAssets(ctx)
+	var aCode string
+	var aName string
 	for _, v := range assets {
 		assetCode := v.AssetCode
 		assetName := v.AssetName
@@ -174,14 +175,14 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 			// If there's an even number of prices
 			if l%2 == 0 {
 				// TODO make sure this is safe.
-				// Since it's a price and not a blance, division with precision loss is OK.
+				// Since it's a price and not a balance, division with precision loss is OK.
 				price1 := notExpiredPrices[l/2-1].Price
 				price2 := notExpiredPrices[l/2].Price
 				sum := price1.Add(price2)
 				divsor := sdk.NewInt(2)
 				medianPrice = sum.Quo(divsor)
 				// TODO Check if safe, makes sense
-				// Takes the average of the two expiries rounded down to the nearest Int.
+				// Takes the average of the two expires rounded down to the nearest Int.
 				expiry = notExpiredPrices[l/2-1].Expiry.Add(notExpiredPrices[l/2].Expiry).Quo(sdk.NewInt(2))
 			} else {
 				// integer division, so we'll get an integer back, rounded down
@@ -196,9 +197,20 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 			Price:     medianPrice,
 			Expiry:    expiry,
 		}
+
+		//saves assets code and name for later delete op
+		aCode = assetCode
+		aName = assetName
 		store.Set(
 			[]byte(CurrentPricePrefix+k.combineAssetInfo(assetCode, assetName)), k.cdc.MustMarshalBinaryBare(currentPrice),
 		)
+	}
+
+	//delete the just set price from requiredPrices keystore, if exists
+	requiredPricesStore := ctx.KVStore(k.priceStoreKey)
+	requiredPrice := requiredPricesStore.Get([]byte(RequiredPricesPrefix + k.combineAssetInfo(aCode, aName)))
+	if requiredPrice != nil {
+		requiredPricesStore.Delete([]byte(RequiredPricesPrefix + k.combineAssetInfo(aCode, aName)))
 	}
 
 	return nil
@@ -266,8 +278,8 @@ func (k Keeper) GetOracle(ctx sdk.Context, oracle string) (Oracle, bool) {
 func (k Keeper) AskForPrice(ctx sdk.Context, assetCode string, assetName string) {
 
 	// recover the existing prices, if any
-	store := ctx.KVStore(k.pricesRequestsStoreKey)
-	existing := store.Get([]byte(RequiredPricesPrefix))
+	store := ctx.KVStore(k.priceStoreKey)
+	existing := store.Get([]byte(RequiredPricesPrefix + k.combineAssetInfo(assetCode, assetName)))
 
 	var requiredPrices []PendingPriceAsset
 	if existing != nil {
@@ -288,7 +300,7 @@ func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string, assetName str
 
 	store := ctx.KVStore(k.priceStoreKey)
 
-	bz := store.Get([]byte(k.combineAssetInfo(assetCode, assetName)))
+	bz := store.Get([]byte(CurrentPricePrefix + k.combineAssetInfo(assetCode, assetName)))
 
 	var price types.CurrentPrice
 

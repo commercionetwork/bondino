@@ -47,7 +47,7 @@ type CurrentPrice struct {
 	AssetName string  `json:"asset_name"`
 	AssetCode string  `json:"asset_code"`
 	Price     sdk.Int `json:"price"`
-	Expiry    sdk.Int `json:"expiry"`
+	Expiry    sdk.Int `json:"expiry"` //this is the block height at which the price expires
 }
 
 // implement fmt.Stringer
