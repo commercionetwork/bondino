@@ -22,13 +22,13 @@ type CdpKeeper interface {
 	SubtractCoins(ctx sdk.Context, address sdk.AccAddress, amount sdk.Coins) (sdk.Coins, sdk.Error)
 	GetCoins(ctx sdk.Context, address sdk.AccAddress) sdk.Coins
 	HasCoins(ctx sdk.Context, address sdk.AccAddress, amount sdk.Coins) bool
-	ModifyCDPType(ctx sdk.Context, AssetName string, AssetCode string) sdk.Error
+	ModifyCDPType(ctx sdk.Context, AssetName string) sdk.Error
 }
 
 type PricefeedKeeper interface {
 	GetCurrentPrice(context sdk.Context, assetCode string, assetName string) CurrentPrice
 	// These are used for testing TODO replace mockApp with keeper in tests to remove these
-	AddAsset(context sdk.Context, assetCode string, assetString string)
+	AddAsset(context sdk.Context, assetName string, assetCode string, assetString string)
 	SetPrice(context sdk.Context, oracle sdk.AccAddress, assetCode string, assetName string, price sdk.Int, expiry sdk.Int) (PostedPrice, sdk.Error)
 	SetCurrentPrices(sdk.Context) sdk.Error
 	AskForPrice(ctx sdk.Context, assetCode string, assetName string)

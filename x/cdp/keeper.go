@@ -170,7 +170,9 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 		panic(err) // this shouldn't happen because coin balance was checked earlier
 	}
 
-	//TODO FROM HERE, BUGGED CODE
+	//TODO FROM HERE, BUGGED CODE, or better,
+	// if you try to send a tx it will stop at this point, while checking for liquidityCurrentPrice, if it not set,
+	// it will throw error, after line 183 code need to be tested
 
 	// Set CDP
 	liquidityCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, "", liquidity.Coin.Denom)
@@ -198,6 +200,20 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	return nil
 }
 
+func (k Keeper) ModifyCDPType(ctx sdk.Context, assetName string) sdk.Error {
+	// Get all cdps with assetName
+	cdps, _ := k.GetCDPs(ctx, assetName, sdk.NewInt(0))
+
+	for _, cdp := range cdps {
+		err := k.ModifyCDP(ctx, cdp.Owner, cdp.Collateral, cdp.Liquidity)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+/*
 func (k Keeper) ModifyCDPType(ctx sdk.Context, assetName string, assetCode string) sdk.Error {
 
 	// Get all cdps with assetName
@@ -234,6 +250,7 @@ func (k Keeper) ModifyCDPType(ctx sdk.Context, assetName string, assetCode strin
 	}
 	return nil
 }
+*/
 
 // TODO
 // // TransferCDP allows people to transfer ownership of their CDPs to others
@@ -395,7 +412,7 @@ func (k Keeper) deleteCDP(ctx sdk.Context, cdp types.CDP) { // TODO should this 
 	store.Delete(k.getCDPKey(cdp.Owner, cdp.Collateral.Token.GetName()))
 }
 
-// GetCDPs returns all CDPs, optionally filtered by collateral type and liquidation price.
+// GetCDPs returns all CDPs, optionally filtered by collateral name and liquidation price.
 // `price` filters for CDPs that will be below the liquidation ratio when the collateral is at that specified price.
 func (k Keeper) GetCDPs(ctx sdk.Context, collateralDenom string, price sdk.Int) (types.CDPs, sdk.Error) {
 	// Validate inputs

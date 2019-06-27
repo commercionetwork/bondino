@@ -15,9 +15,9 @@ import (
 // GetCmdPostPrice cli command for posting prices.
 func GetCmdPostPrice(cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "postprice [assetCode] [price] [expiry]",
+		Use:   "postprice [assetName] [assetCode] [price] [expiry]",
 		Short: "post the latest price for a particular asset",
-		Args:  cobra.ExactArgs(3),
+		Args:  cobra.ExactArgs(4),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
 			txBldr := authtxb.NewTxBuilderFromCLI().WithTxEncoder(utils.GetTxEncoder(cdc))
@@ -27,17 +27,17 @@ func GetCmdPostPrice(cdc *codec.Codec) *cobra.Command {
 
 			price, ok := sdk.NewIntFromString(args[1])
 			if !ok {
-				fmt.Printf("invalid price - %s \n", string(args[1]))
+				fmt.Printf("invalid price - %s \n", string(args[2]))
 				return nil
 			}
 
 			expiry, ok := sdk.NewIntFromString(args[2])
 			if !ok {
-				fmt.Printf("invalid expiry - %s \n", string(args[2]))
+				fmt.Printf("invalid expiry - %s \n", string(args[3]))
 				return nil
 			}
 
-			msg := pricefeed.NewMsgPostPrice(cliCtx.GetFromAddress(), args[0], price, expiry)
+			msg := pricefeed.NewMsgPostPrice(cliCtx.GetFromAddress(), args[0], args[1], price, expiry)
 			err := msg.ValidateBasic()
 			if err != nil {
 				return err

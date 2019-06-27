@@ -20,6 +20,7 @@ const (
 
 type postPriceReq struct {
 	BaseReq   rest.BaseReq `json:"base_req"`
+	AssetName string       `json:"asset_name"`
 	AssetCode string       `json:"asset_code"`
 	Price     string       `json:"price"`
 	Expiry    string       `json:"expiry"`
@@ -66,7 +67,7 @@ func postPriceHandler(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerF
 		}
 
 		// create the message
-		msg := pricefeed.NewMsgPostPrice(addr, req.AssetCode, price, expiry)
+		msg := pricefeed.NewMsgPostPrice(addr, req.AssetName, req.AssetCode, price, expiry)
 		err = msg.ValidateBasic()
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

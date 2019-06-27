@@ -84,9 +84,9 @@ func (k Keeper) AddOracle(ctx sdk.Context, address string) {
 }
 
 // AddAsset adds an asset to the store
-func (k Keeper) AddAsset(ctx sdk.Context, assetCode string, desc string) {
+func (k Keeper) AddAsset(ctx sdk.Context, assetName string, assetCode string, desc string) {
 	assets := k.GetAssets(ctx)
-	assets = append(assets, Asset{AssetCode: assetCode, Description: desc})
+	assets = append(assets, Asset{AssetName: assetName, AssetCode: assetCode, Description: desc})
 	store := ctx.KVStore(k.priceStoreKey)
 	store.Set([]byte(AssetPrefix), k.cdc.MustMarshalBinaryBare(assets))
 }
@@ -108,7 +108,7 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 		}
 		// set the price for that particular oracle
 		if found {
-			prices[index] = types.PostedPrice{AssetCode: assetCode, OracleAddress: oracle.String(), Price: price, Expiry: expiry}
+			prices[index] = types.PostedPrice{AssetName: assetName, AssetCode: assetCode, OracleAddress: oracle.String(), Price: price, Expiry: expiry}
 		} else {
 			prices = append(prices, types.PostedPrice{
 				AssetName:     assetName,
@@ -121,7 +121,10 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 		}
 
 		store.Set([]byte(RawPriceFeedPrefix+k.combineAssetInfo(assetCode, assetName)), k.cdc.MustMarshalBinaryBare(prices))
-		err := k.cdpKeeper.ModifyCDPType(ctx, assetName, assetCode)
+
+		//TODO this operation doesnt make sense here because the cdps should be updated when there's a current price set
+		//TODO not a raw one, because we need a median price from all the oracles
+		err := k.cdpKeeper.ModifyCDPType(ctx, assetName)
 		if err != nil {
 			return types.PostedPrice{}, err
 		}
@@ -136,8 +139,6 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 // SetCurrentPrices updates the price of an asset to the median of all valid oracle inputs
 func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 	assets := k.GetAssets(ctx)
-	var aCode string
-	var aName string
 	for _, v := range assets {
 		assetCode := v.AssetCode
 		assetName := v.AssetName
@@ -193,24 +194,22 @@ func (k Keeper) SetCurrentPrices(ctx sdk.Context) sdk.Error {
 
 		store := ctx.KVStore(k.priceStoreKey)
 		currentPrice := types.CurrentPrice{
+			AssetName: assetName,
 			AssetCode: assetCode,
 			Price:     medianPrice,
 			Expiry:    expiry,
 		}
 
-		//saves assets code and name for later delete op
-		aCode = assetCode
-		aName = assetName
 		store.Set(
 			[]byte(CurrentPricePrefix+k.combineAssetInfo(assetCode, assetName)), k.cdc.MustMarshalBinaryBare(currentPrice),
 		)
-	}
 
-	//delete the just set price from requiredPrices keystore, if exists
-	requiredPricesStore := ctx.KVStore(k.priceStoreKey)
-	requiredPrice := requiredPricesStore.Get([]byte(RequiredPricesPrefix + k.combineAssetInfo(aCode, aName)))
-	if requiredPrice != nil {
-		requiredPricesStore.Delete([]byte(RequiredPricesPrefix + k.combineAssetInfo(aCode, aName)))
+		//delete the just set price from requiredPrices, if exists
+		requiredPricesStore := ctx.KVStore(k.priceStoreKey)
+		requiredPrice := requiredPricesStore.Get([]byte(RequiredPricesPrefix + k.combineAssetInfo(assetCode, assetName)))
+		if requiredPrice != nil {
+			requiredPricesStore.Delete([]byte(RequiredPricesPrefix + k.combineAssetInfo(assetCode, assetName)))
+		}
 	}
 
 	return nil
@@ -271,10 +270,7 @@ func (k Keeper) GetOracle(ctx sdk.Context, oracle string) (Oracle, bool) {
 
 }
 
-// Deve essere estratto l'oracolo preposto a valutare quel tipo di NFT
-// poi deve essere registrato un msg con l'indicazione del tipo di NFT,
-// il suo ID, l'oracolo preposto e il fatto che sia o meno stato valutato
-// Questo elemento del keystore serve per restitutire un messaggio agli oracoli perché valutino l'NFT
+// Makes a request to get a price for an asset which doesnt already has one
 func (k Keeper) AskForPrice(ctx sdk.Context, assetCode string, assetName string) {
 
 	// recover the existing prices, if any
@@ -321,7 +317,7 @@ func (k Keeper) GetCurrentPrice(ctx sdk.Context, assetCode string, assetName str
 // GetRawPrices fetches the set of all prices posted by oracles for an asset
 func (k Keeper) GetRawPrices(ctx sdk.Context, assetCode string, assetName string) []types.PostedPrice {
 	store := ctx.KVStore(k.priceStoreKey)
-	bz := store.Get([]byte(RawPriceFeedPrefix + assetCode))
+	bz := store.Get([]byte(RawPriceFeedPrefix + k.combineAssetInfo(assetCode, assetName)))
 	var prices []types.PostedPrice
 	k.cdc.MustUnmarshalBinaryBare(bz, &prices)
 	return prices

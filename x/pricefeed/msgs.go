@@ -6,7 +6,7 @@ import (
 
 const (
 	// TypeMsgPostPrice type of PostPrice msg
-	TypeMsgPostPrice = "post_price"
+	TypeMsgPostPrice = "postPrice"
 )
 
 // MsgPostPrice struct representing a posted price message.
@@ -20,9 +20,10 @@ type MsgPostPrice struct {
 }
 
 // NewMsgPostPrice creates a new post price msg
-func NewMsgPostPrice(from sdk.AccAddress, assetCode string, price sdk.Int, expiry sdk.Int) MsgPostPrice {
+func NewMsgPostPrice(from sdk.AccAddress, assetName string, assetCode string, price sdk.Int, expiry sdk.Int) MsgPostPrice {
 	return MsgPostPrice{
 		From:      from,
+		AssetName: assetName,
 		AssetCode: assetCode,
 		Price:     price,
 		Expiry:    expiry,
@@ -51,6 +52,10 @@ func (msg MsgPostPrice) ValidateBasic() sdk.Error {
 	if msg.From.Empty() {
 		return sdk.ErrInternal("invalid (empty) bidder address")
 	}
+	if len(msg.AssetName) == 0 {
+		return sdk.ErrInternal("invalid (empty) asset name")
+	}
+
 	if len(msg.AssetCode) == 0 {
 		return sdk.ErrInternal("invalid (empty) asset code")
 	}
@@ -61,6 +66,5 @@ func (msg MsgPostPrice) ValidateBasic() sdk.Error {
 		return sdk.ErrInternal("invalid (negative) expiry")
 	}
 
-	// TODO check coin denoms
 	return nil
 }
