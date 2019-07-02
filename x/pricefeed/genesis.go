@@ -27,8 +27,12 @@ func DefaultGenesisState() GenesisState {
 			{Type: _NFT, AssetName: "xrp", AssetCode: "01", Description: "the standard"},
 			{Type: _FT, AssetName: "eth", AssetCode: _CODEFT, Description: "ethereum coin"},
 			{Type: _FT, AssetName: "atm", AssetCode: _CODEFT, Description: "cosmos coin"},
+			{Type: _FT, AssetName: "acme", AssetCode: _CODEFT, Description: "test coin"},
 		},
-		[]Oracle{},
+		[]Oracle{
+			{OracleAddress: "tmnt1gnw3y7cpf6yd30dkgs5stymu2qmhm73r3cjufr"},
+			{OracleAddress: "tmnt1pqeqzuju3czmk3qjm7x58w37qexfy26g4gwsdw"},
+		},
 	}
 }
 

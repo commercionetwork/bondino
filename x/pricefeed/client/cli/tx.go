@@ -25,13 +25,13 @@ func GetCmdPostPrice(cdc *codec.Codec) *cobra.Command {
 				return err
 			}
 
-			price, ok := sdk.NewIntFromString(args[1])
+			price, ok := sdk.NewIntFromString(args[2])
 			if !ok {
 				fmt.Printf("invalid price - %s \n", string(args[2]))
 				return nil
 			}
 
-			expiry, ok := sdk.NewIntFromString(args[2])
+			expiry, ok := sdk.NewIntFromString(args[3])
 			if !ok {
 				fmt.Printf("invalid expiry - %s \n", string(args[3]))
 				return nil

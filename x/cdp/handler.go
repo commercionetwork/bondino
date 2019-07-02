@@ -29,3 +29,17 @@ func handleMsgCreateOrModifyCDP(ctx sdk.Context, keeper Keeper, msg MsgCreateOrM
 
 	return sdk.Result{}
 }
+
+//EndBlocker updates cdp asset's price, when set
+func EndBlocker(ctx sdk.Context, k Keeper) sdk.Tags {
+
+	err := k.ModifyCDPType(ctx, "")
+
+	if err != nil {
+		fmt.Printf(err.Error())
+		panic(err)
+	}
+
+	return sdk.Tags{}
+
+}

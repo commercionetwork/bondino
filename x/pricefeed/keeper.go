@@ -93,7 +93,7 @@ func (k Keeper) AddAsset(ctx sdk.Context, assetName string, assetCode string, de
 
 // SetPrice updates the posted price for a specific oracle
 func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName string, assetCode string, price sdk.Int, expiry sdk.Int) (types.PostedPrice, sdk.Error) {
-	// If the expiry is less than or equal to the current blockheight, we consider the price valid
+	// If the expiry is greater than or equal to the current blockheight, we consider the price valid
 	if expiry.GTE(sdk.NewInt(ctx.BlockHeight())) {
 		store := ctx.KVStore(k.priceStoreKey)
 		prices := k.GetRawPrices(ctx, assetCode, assetName)
@@ -121,13 +121,6 @@ func (k Keeper) SetPrice(ctx sdk.Context, oracle sdk.AccAddress, assetName strin
 		}
 
 		store.Set([]byte(RawPriceFeedPrefix+k.combineAssetInfo(assetCode, assetName)), k.cdc.MustMarshalBinaryBare(prices))
-
-		//TODO this operation doesnt make sense here because the cdps should be updated when there's a current price set
-		//TODO not a raw one, because we need a median price from all the oracles
-		err := k.cdpKeeper.ModifyCDPType(ctx, assetName)
-		if err != nil {
-			return types.PostedPrice{}, err
-		}
 
 		return prices[index], nil
 	}

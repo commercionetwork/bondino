@@ -32,11 +32,13 @@ func HandleMsgPostPrice(ctx sdk.Context, k Keeper, msg MsgPostPrice) sdk.Result 
 	// TODO cleanup message validation and errors
 	err := k.ValidatePostPrice(ctx, msg)
 	if err != nil {
+		fmt.Printf(err.Error())
 		return err.Result()
 	}
 
 	_, err = k.SetPrice(ctx, msg.From, msg.AssetName, msg.AssetCode, msg.Price, msg.Expiry)
 	if err != nil {
+		fmt.Printf(err.Error())
 		return err.Result()
 	}
 
@@ -53,11 +55,7 @@ func EndBlocker(ctx sdk.Context, k Keeper) sdk.Tags {
 	//TODO use an iterator and update the prices for all assets in the store
 	err := k.SetCurrentPrices(ctx)
 	if err != nil {
-		panic(err)
-	}
-
-	err = k.cdpKeeper.ModifyCDPType(ctx, "")
-	if err != nil {
+		fmt.Printf(err.Error())
 		panic(err)
 	}
 
