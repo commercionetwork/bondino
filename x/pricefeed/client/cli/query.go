@@ -13,16 +13,17 @@ import (
 // GetCmdCurrentPrice queries the current price of an asset
 func GetCmdCurrentPrice(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
-		Use:   "price [assetCode]",
+		Use:   "price [assetName] [assetCode]",
 		Short: "get the current price of an asset",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			assetCode := args[0]
-			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/price/%s", queryRoute, assetCode), nil)
+			assetName := args[0]
+			assetCode := args[1]
+			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/price/%s/%s", queryRoute, assetName, assetCode), nil)
 			if err != nil {
 				fmt.Printf("error when querying current price - %s", err)
-				fmt.Printf("could not get current price for - %s \n", string(assetCode))
+				fmt.Printf("could not get current price for - %s %s \n", string(assetName), string(assetCode))
 				return nil
 			}
 			var out types.CurrentPrice
@@ -32,6 +33,7 @@ func GetCmdCurrentPrice(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	}
 }
 
+//TODO IMO we shouldnt expose this
 // GetCmdRawPrices queries the current price of an asset
 func GetCmdRawPrices(queryRoute string, cdc *codec.Codec) *cobra.Command {
 	return &cobra.Command{
@@ -62,7 +64,25 @@ func GetCmdAssets(queryRoute string, cdc *codec.Codec) *cobra.Command {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
 			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/assets", queryRoute), nil)
 			if err != nil {
-				fmt.Printf("could not get assets")
+				fmt.Printf("could not get assets \n")
+				return nil
+			}
+			var out pricefeed.QueryAssetsResp
+			cdc.MustUnmarshalJSON(res, &out)
+			return cliCtx.PrintOutput(out)
+		},
+	}
+}
+
+func GetCmdPendingPrices(queryRoute string, cdc *codec.Codec) *cobra.Command {
+	return &cobra.Command{
+		Use:   "pending-prices",
+		Short: "get the assets with pending prices",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := context.NewCLIContext().WithCodec(cdc)
+			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/pending", queryRoute), nil)
+			if err != nil {
+				fmt.Printf("could not get any pending prices asset \n")
 				return nil
 			}
 			var out pricefeed.QueryAssetsResp

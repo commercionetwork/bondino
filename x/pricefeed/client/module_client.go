@@ -29,8 +29,9 @@ func (mc ModuleClient) GetQueryCmd() *cobra.Command {
 
 	pricefeedQueryCmd.AddCommand(client.GetCommands(
 		pricefeedcmd.GetCmdCurrentPrice(mc.storeKey, mc.cdc),
-		pricefeedcmd.GetCmdRawPrices(mc.storeKey, mc.cdc),
+		//pricefeedcmd.GetCmdRawPrices(mc.storeKey, mc.cdc),
 		pricefeedcmd.GetCmdAssets(mc.storeKey, mc.cdc),
+		pricefeedcmd.GetCmdPendingPrices(mc.storeKey, mc.cdc),
 	)...)
 
 	return pricefeedQueryCmd

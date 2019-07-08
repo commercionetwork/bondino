@@ -28,14 +28,12 @@ const (
 
 // implement fmt.Stringer
 func (a Asset) String() string {
-	return strings.TrimSpace(fmt.Sprintf(`AssetCode: %s
-Description: %s`, a.AssetCode, a.Description))
+	return strings.TrimSpace(fmt.Sprintf(`AssetCode: %s, AssetName: %s, Description: %s`, a.AssetCode, a.AssetName, a.Description))
 }
 
 // implement fmt.Stringer
 func (a PendingPriceAsset) String() string {
-	return strings.TrimSpace(fmt.Sprintf(`AssetName: %s
-AssetCode: %s`, a.AssetName, a.AssetCode))
+	return strings.TrimSpace(fmt.Sprintf(`AssetName: %s, AssetCode: %s`, a.AssetName, a.AssetCode))
 }
 
 // QueryRawPricesResp response to a rawprice query
@@ -60,8 +58,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 		switch path[0] {
 		case QueryCurrentPrice:
 			return queryCurrentPrice(ctx, path[1:], req, keeper)
-		case QueryRawPrices:
-			return queryRawPrices(ctx, path[1:], req, keeper)
+		//case QueryRawPrices:
+		//	return queryRawPrices(ctx, path[1:], req, keeper)
 		case QueryAssets:
 			return queryAssets(ctx, req, keeper)
 		case QueryPendingPrices:
