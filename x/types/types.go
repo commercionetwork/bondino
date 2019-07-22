@@ -8,7 +8,7 @@ import (
 
 type Collateral struct {
 	Token        Token   `json:"token"`
-	Amount       sdk.Int `json:"qty"`
+	Amount       sdk.Int `json:"amount"`
 	InitialPrice sdk.Int `json:"initial_price"`
 }
 
@@ -31,6 +31,7 @@ func (c Collateral) CollateralValue() sdk.Int {
 type Liquidity struct {
 	Coin         sdk.Coin `json:"coin"`
 	InitialPrice sdk.Int  `json:"initial_price"`
+	AssetCode    string   `json:"asset_code"`
 }
 
 func (l Liquidity) String() string {

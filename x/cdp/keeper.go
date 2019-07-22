@@ -40,12 +40,12 @@ func (k Keeper) getAssetCodeAndName(token types.Token) (string, string) {
 	assetName := token.GetName()
 
 	var assetCode string
-	switch token := token.(type) {
+	switch /* token := */ token.(type) {
 	case BaseFT:
-		assetCode = ""
+		assetCode = "0"
 		break
 	case NFT:
-		assetCode = token.GetID()
+		assetCode = "01" //token.GetID() change in to this when debug is finished
 		break
 	}
 
@@ -115,6 +115,7 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	// if the price is zero, then ask for the price of the token
 	if collateralCurrentPrice.Price.IsZero() {
 		k.pricefeed.AskForPrice(ctx, assetCode, assetName)
+		return sdk.ErrInternal("Collateral price is actually zero")
 	}
 
 	isUnderCollateralized := cdp.IsUnderCollateralized(collateralCurrentPrice.Price,
@@ -170,12 +171,8 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 		panic(err) // this shouldn't happen because coin balance was checked earlier
 	}
 
-	//TODO FROM HERE, BUGGED CODE, or better,
-	// if you try to send a tx it will stop at this point, while checking for liquidityCurrentPrice, if it not set,
-	// it will throw error, after line 183 code need to be tested
-
 	// Set CDP
-	liquidityCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, "", liquidity.Coin.Denom)
+	liquidityCurrentPrice := k.pricefeed.GetCurrentPrice(ctx, liquidity.AssetCode, liquidity.Coin.Denom)
 	if liquidityCurrentPrice.Price.IsZero() {
 		return sdk.ErrInvalidCoins("Liquidity price cant be equal to zero")
 	}
@@ -194,8 +191,6 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	// set total debts
 	k.setGlobalDebt(ctx, gDebt)
 	k.setCollateralState(ctx, collateralState)
-
-	fmt.Printf("ends without errors")
 
 	return nil
 }
@@ -385,6 +380,8 @@ func (k Keeper) getCDPKey(owner sdk.AccAddress, collateralDenom string) []byte {
 		nil, // no separator
 	)
 }
+
+//TODO this should be modified soon when we had nft with valid nftID, in order to search cdp for a specific nft
 func (k Keeper) GetCDP(ctx sdk.Context, owner sdk.AccAddress, collateralDenom string, nftID string) (types.CDP, bool) {
 	// get store
 	store := ctx.KVStore(k.storeKey)

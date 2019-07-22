@@ -45,8 +45,6 @@ type PostedPrice struct {
 
 // implement fmt.Stringer
 func (pp PostedPrice) String() string {
-	return strings.TrimSpace(fmt.Sprintf(`AssetCode: %s
-OracleAddress: %s
-Price: %s
-Expiry: %s`, pp.AssetCode, pp.OracleAddress, pp.Price, pp.Expiry))
+	return strings.TrimSpace(fmt.Sprintf(`AssetCode: %s OracleAddress: %s Price: %s Expiry: %s`, pp.AssetCode,
+		pp.OracleAddress, pp.Price, pp.Expiry))
 }

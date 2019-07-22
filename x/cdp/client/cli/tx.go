@@ -43,7 +43,8 @@ func GetCmdModifyFtCdp(cdc *codec.Codec) *cobra.Command {
 
 			// compose the liquidity value
 			liquidity := types.Liquidity{
-				Coin: sdk.NewCoin(args[3], sdk.NewInt(0)),
+				Coin:      sdk.NewCoin(args[3], sdk.NewInt(0)),
+				AssetCode: "0",
 			}
 
 			msg := cdp.NewMsgCreateOrModifyCDP(cliCtx.GetFromAddress(), collateral, liquidity)
@@ -87,7 +88,8 @@ func GetCmdModifyNftCdp(cdc *codec.Codec) *cobra.Command {
 
 			// build the liquidity
 			liquidity := types.Liquidity{
-				Coin: sdk.NewCoin(args[4], sdk.NewInt(0)),
+				Coin:      sdk.NewCoin(args[4], sdk.NewInt(0)),
+				AssetCode: "01",
 			}
 
 			// create the message

@@ -80,7 +80,7 @@ func GetCmdPendingPrices(queryRoute string, cdc *codec.Codec) *cobra.Command {
 		Short: "get the assets with pending prices",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/pending", queryRoute), nil)
+			res, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/pending-prices", queryRoute), nil)
 			if err != nil {
 				fmt.Printf("could not get any pending prices asset \n")
 				return nil
