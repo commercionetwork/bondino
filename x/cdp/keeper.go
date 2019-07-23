@@ -182,13 +182,15 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 	if !found {
 		collateralValue = collateralCurrentPrice.Price.Mul(collateral.Amount)
 	} else {
+		collateralValue = collateralCurrentPrice.Price.Mul(collateral.Amount)
 		cdp.Collateral.Amount = cdp.Collateral.Amount.Add(collateral.Amount)
-		collateralValue = collateralCurrentPrice.Price.Mul(cdp.Collateral.Amount)
 	}
 	// get the collateral value = price * quantity
 
 	// get the liquidity amount = collateral-value / liquidity price
-	cdp.Liquidity.Coin.Amount = collateralValue.Quo(liquidityCurrentPrice.Price)
+	newLiquidityAmount := collateralValue.Quo(liquidityCurrentPrice.Price)
+
+	cdp.Liquidity.Coin.Amount = cdp.Liquidity.Coin.Amount.Add(newLiquidityAmount)
 
 	if cdp.Collateral.Amount.IsZero() && cdp.Liquidity.Coin.Amount.IsZero() { // TODO maybe abstract this logic into setCDP
 		k.deleteCDP(ctx, cdp)
