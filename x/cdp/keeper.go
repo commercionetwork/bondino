@@ -177,12 +177,9 @@ func (k Keeper) ModifyCDP(ctx sdk.Context, owner sdk.AccAddress, collateral type
 		return sdk.ErrInvalidCoins("Liquidity price cant be equal to zero")
 	}
 
-	var collateralValue sdk.Int
+	collateralValue := collateralCurrentPrice.Price.Mul(collateral.Amount)
 
-	if !found {
-		collateralValue = collateralCurrentPrice.Price.Mul(collateral.Amount)
-	} else {
-		collateralValue = collateralCurrentPrice.Price.Mul(collateral.Amount)
+	if found {
 		cdp.Collateral.Amount = cdp.Collateral.Amount.Add(collateral.Amount)
 	}
 	// get the collateral value = price * quantity
